@@ -33,4 +33,11 @@ describe("toResult", () => {
 
     expect(result).toEqual(R.fail("failure"))
   })
+
+  it("should transform a None value to a given Error", async () => {
+    const option = Promise.resolve(none())
+    const result = await toResult(option, "failure")
+
+    expect(result).toEqual(R.fail("failure"))
+  })
 })
