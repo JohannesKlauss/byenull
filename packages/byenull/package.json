@@ -31,7 +31,6 @@
     "prepublishOnly": "../../node_modules/.bin/vp run build"
   },
   "devDependencies": {
-    "@types/node": "catalog:",
     "typescript": "catalog:",
     "vite-plus": "catalog:"
   }

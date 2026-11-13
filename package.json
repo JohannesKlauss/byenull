@@ -1,10 +1,12 @@
 {
   "name": "byenull",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "vp pack",
     "dev": "vp pack --watch",
     "test": "vp test",
+    "fmt": "vp fmt",
     "check": "vp check",
     "check:fix": "vp check --fix",
     "prepublishOnly": "vp run build"
