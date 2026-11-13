@@ -189,6 +189,10 @@ importers:
         version: 1.3.0(@types/node@26.6.6)(@vitest/ui@5.0.5)(typescript@7.0.2)(yaml@2.9.1)
 
   packages/byenull:
+    dependencies:
+      '@praha/byethrow':
+        specifier: ^0
+        version: 0.13.0(typescript@7.0.2)
     devDependencies:
       typescript:
         specifier: 'catalog:'
@@ -604,6 +608,14 @@ packages:
 
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
+
+  '@praha/byethrow@0.13.0':
+    resolution: {integrity: sha512-YbmTlWzvtwiaK1ZhUOzXleJFju6XvBILxkL3AmvHona7zalABaQsPIGwc6YkugirpwG3n4Sc2iKGSwnTEv/hsQ==}
+    peerDependencies:
+      typescript: '>=5.0.0'
+
+  '@standard-schema/spec@1.1.0':
+    resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
   '@testing-library/dom@10.4.2':
     resolution: {integrity: sha512-yzr2S9HyAIdhz2/6qHgbs665Q7PKVcDF05vsOlHPxG1mo36gKVesdYVeDLnXgfjJ03CrKRk08knc6+E/9m8v2Q==}
@@ -1679,6 +1691,13 @@ snapshots:
   '@pnpm/deps.graph-sequencer@1100.0.1': {}
 
   '@polka/url@1.0.0-next.29': {}
+
+  '@praha/byethrow@0.13.0(typescript@7.0.2)':
+    dependencies:
+      '@standard-schema/spec': 1.1.0
+      typescript: 7.0.2
+
+  '@standard-schema/spec@1.1.0': {}
 
   '@testing-library/dom@10.4.2':
     dependencies:

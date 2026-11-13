@@ -1,298 +1,95 @@
-import { describe, expect, it, vi } from "vite-plus/test";
+import { describe, expect, expectTypeOf, it, vi } from "vite-plus/test";
+import type { Option, OptionAsync } from "../option";
 import { none } from "./none";
-import {orElse} from "./or-else";
+import { orElse } from "./or-else";
 import { some } from "./some";
 
 describe("orElse", () => {
-  describe("when fallback is synchronous", () => {
-    describe("and returns a Some value", () => {
-      const fallback = vi.fn(() => some("4"));
+  describe("runtime", () => {
+    describe.each([
+      ["synchronous Some", () => some("4"), some("4"), true],
+      ["synchronous None", () => none(), none(), true],
+      ["asynchronous Some", () => Promise.resolve(some("4")), some("4"), false],
+      ["asynchronous None", () => Promise.resolve(none()), none(), false],
+    ])("with a %s fallback", (_, fn, fallbackResult, synchronousFallback) => {
+      it.each([
+        ["synchronous Some", some(2), true, true],
+        ["synchronous None", none(), false, true],
+        ["asynchronous Some", Promise.resolve(some(2)), true, false],
+        ["asynchronous None", Promise.resolve(none()), false, false],
+      ])("handles %s input", async (_, input, hasValue, synchronousInput) => {
+        const fallback = vi.fn(fn);
+        const result = orElse(fallback)(input);
+        const expected = hasValue ? some(2) : fallbackResult;
 
-      describe("when input is synchronous", () => {
-        describe("when input is Some", () => {
-          const input = some(2);
+        if (synchronousFallback && synchronousInput) {
+          expect(result).toEqual(expected);
+        }
+        expect(await result).toEqual(expected);
+        expect(fallback).toHaveBeenCalledTimes(hasValue ? 0 : 1);
+      });
+    });
+  });
 
-          it("should leave input as is", () => {
-            const option = orElse(fallback)(input);
+  describe("types", () => {
+    describe("when input is None", () => {
+      it("should infer orElse return type as result of fallback when input is None", () => {
+        const fallback = () => some("4");
+        const result = orElse(fallback)(none());
 
-            expect(option).toEqual(some(2));
-          });
-
-          it("should not call the fallback function", () => {
-            orElse(fallback)(input);
-
-            expect(fallback).not.toHaveBeenCalled();
-          });
-        });
-
-        describe("when input is None", () => {
-          const input = none();
-
-          it("should return output of fallback", () => {
-            const option = orElse(fallback)(input);
-
-            expect(option).toEqual(some("4"));
-          });
-
-          it("should call the fallback function", () => {
-            orElse(fallback)(input);
-
-            expect(fallback).toHaveBeenCalled();
-          });
-        });
+        expectTypeOf(result).toEqualTypeOf<Option<string>>();
       });
 
-      describe("when input is asynchronous", () => {
-        describe("when input is Some", () => {
-          const input = Promise.resolve(some(2));
+      it("should widen to OptionAsync when input is Promise", () => {
+        const fallback = () => some("4");
+        const result = orElse(fallback)(Promise.resolve(none()));
 
-          it("should leave input as is", async () => {
-            const option = await orElse(fallback)(input);
-
-            expect(option).toEqual(some(2));
-          });
-
-          it("should not call the fallback function", async () => {
-            await orElse(fallback)(input);
-
-            expect(fallback).not.toHaveBeenCalled();
-          });
-        });
-
-        describe("when input is None", () => {
-          const input = Promise.resolve(none());
-
-          it("should return output of fallback", async () => {
-            const option = await orElse(fallback)(input);
-
-            expect(option).toEqual(some("4"));
-          });
-
-          it("should call the fallback function", async () => {
-            await orElse(fallback)(input);
-
-            expect(fallback).toHaveBeenCalled();
-          });
-        });
-      });
-    })
-
-    describe("and returns a None value", () => {
-      const fallback = vi.fn(() => none());
-
-      describe("when input is synchronous", () => {
-        describe("when input is Some", () => {
-          const input = some(2);
-
-          it("should leave input as is", () => {
-            const option = orElse(fallback)(input);
-
-            expect(option).toEqual(some(2));
-          });
-
-          it("should not call the fallback function", () => {
-            orElse(fallback)(input);
-
-            expect(fallback).not.toHaveBeenCalled();
-          });
-        });
-
-        describe("when input is None", () => {
-          const input = none();
-
-          it("should return output of fallback", () => {
-            const option = orElse(fallback)(input);
-
-            expect(option).toEqual(none());
-          });
-
-          it("should call the fallback function", () => {
-            orElse(fallback)(input);
-
-            expect(fallback).toHaveBeenCalled();
-          });
-        });
+        expectTypeOf(result).toEqualTypeOf<OptionAsync<string>>();
       });
 
-      describe("when input is asynchronous", () => {
-        describe("when input is Some", () => {
-          const input = Promise.resolve(some(2));
+      it("should infer orElse return promise type as result of fallback when input is None and fallback is asynchronous", () => {
+        const fallback = () => Promise.resolve(some("4"));
+        const result = orElse(fallback)(none());
 
-          it("should leave input as is", async () => {
-            const option = await orElse(fallback)(input);
-
-            expect(option).toEqual(some(2));
-          });
-
-          it("should not call the fallback function", async () => {
-            await orElse(fallback)(input);
-
-            expect(fallback).not.toHaveBeenCalled();
-          });
-        });
-
-        describe("when input is None", () => {
-          const input = Promise.resolve(none());
-
-          it("should return output of fallback", async () => {
-            const option = await orElse(fallback)(input);
-
-            expect(option).toEqual(none());
-          });
-
-          it("should call the fallback function", async () => {
-            await orElse(fallback)(input);
-
-            expect(fallback).toHaveBeenCalled();
-          });
-        });
-      });
-    })
-  })
-
-  describe("when fallback is asynchronous", () => {
-    describe("and returns a Some value", () => {
-      const fallback = vi.fn(() => Promise.resolve(some("4")));
-
-      describe("when input is synchronous", () => {
-        describe("when input is Some", () => {
-          const input = some(2);
-
-          it("should leave input as is", async () => {
-            const option = await orElse(fallback)(input);
-
-            expect(option).toEqual(some(2));
-          });
-
-          it("should not call the fallback function", async () => {
-            await orElse(fallback)(input);
-
-            expect(fallback).not.toHaveBeenCalled();
-          });
-        });
-
-        describe("when input is None", () => {
-          const input = none();
-
-          it("should return output of fallback", async () => {
-            const option = await orElse(fallback)(input);
-
-            expect(option).toEqual(some("4"));
-          });
-
-          it("should call the fallback function", async () => {
-            await orElse(fallback)(input);
-
-            expect(fallback).toHaveBeenCalled();
-          });
-        });
+        expectTypeOf(result).toEqualTypeOf<OptionAsync<string>>();
       });
 
-      describe("when input is asynchronous", () => {
-        describe("when input is Some", () => {
-          const input = Promise.resolve(some(2));
+      it("should infer orElse return type as result of fallback when input is None and async fallback is awaited", async () => {
+        const fallback = () => Promise.resolve(some("4"));
+        const result = await orElse(fallback)(none());
 
-          it("should leave input as is", async () => {
-            const option = await orElse(fallback)(input);
-
-            expect(option).toEqual(some(2));
-          });
-
-          it("should not call the fallback function", async () => {
-            await orElse(fallback)(input);
-
-            expect(fallback).not.toHaveBeenCalled();
-          });
-        });
-
-        describe("when input is None", () => {
-          const input = Promise.resolve(none());
-
-          it("should return output of fallback", async () => {
-            const option = await orElse(fallback)(input);
-
-            expect(option).toEqual(some("4"));
-          });
-
-          it("should call the fallback function", async () => {
-            await orElse(fallback)(input);
-
-            expect(fallback).toHaveBeenCalled();
-          });
-        });
+        expectTypeOf(result).toEqualTypeOf<Option<string>>();
       });
-    })
+    });
 
-    describe("and returns a None value", () => {
-      const fallback = vi.fn(() => Promise.resolve(none()));
+    describe("when input is Some", () => {
+      it("should union Option type from result of fallback and input", () => {
+        const fallback = () => some("4");
+        const result = orElse(fallback)(some(2));
 
-      describe("when input is synchronous", () => {
-        describe("when input is Some", () => {
-          const input = some(2);
-
-          it("should leave input as is", async () => {
-            const option = await orElse(fallback)(input);
-
-            expect(option).toEqual(some(2));
-          });
-
-          it("should not call the fallback function", async () => {
-            await orElse(fallback)(input);
-
-            expect(fallback).not.toHaveBeenCalled();
-          });
-        });
-
-        describe("when input is None", () => {
-          const input = none();
-
-          it("should return output of fallback", async () => {
-            const option = await orElse(fallback)(input);
-
-            expect(option).toEqual(none());
-          });
-
-          it("should call the fallback function", async () => {
-            await orElse(fallback)(input);
-
-            expect(fallback).toHaveBeenCalled();
-          });
-        });
+        expectTypeOf(result).toEqualTypeOf<Option<number | string>>();
       });
 
-      describe("when input is asynchronous", () => {
-        describe("when input is Some", () => {
-          const input = Promise.resolve(some(2));
+      it("should widen to OptionAsync when input is Promise", () => {
+        const fallback = () => some("4");
+        const result = orElse(fallback)(Promise.resolve(some(2)));
 
-          it("should leave input as is", async () => {
-            const option = await orElse(fallback)(input);
-
-            expect(option).toEqual(some(2));
-          });
-
-          it("should not call the fallback function", async () => {
-            await orElse(fallback)(input);
-
-            expect(fallback).not.toHaveBeenCalled();
-          });
-        });
-
-        describe("when input is None", () => {
-          const input = Promise.resolve(none());
-
-          it("should return output of fallback", async () => {
-            const option = await orElse(fallback)(input);
-
-            expect(option).toEqual(none());
-          });
-
-          it("should call the fallback function", async () => {
-            await orElse(fallback)(input);
-
-            expect(fallback).toHaveBeenCalled();
-          });
-        });
+        expectTypeOf(result).toEqualTypeOf<OptionAsync<string | number>>();
       });
-    })
-  })
+
+      it("should union Option promise type from result of fallback and input", () => {
+        const fallback = () => Promise.resolve(some("4"));
+        const result = orElse(fallback)(some(2));
+
+        expectTypeOf(result).toEqualTypeOf<OptionAsync<string | number>>();
+      });
+
+      it("should infer orElse return type as result of fallback when input is None and async fallback is awaited", async () => {
+        const fallback = () => Promise.resolve(some("4"));
+        const result = await orElse(fallback)(some(2));
+
+        expectTypeOf(result).toEqualTypeOf<Option<string | number>>();
+      });
+    });
+  });
 });

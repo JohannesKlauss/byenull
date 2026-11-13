@@ -35,6 +35,6 @@
     "vite-plus": "catalog:"
   },
   "peerDependencies": {
-    "@praha-inc/byethrow": "^0"
+    "@praha/byethrow": "^0"
   }
 }

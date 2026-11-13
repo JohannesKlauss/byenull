@@ -16,12 +16,12 @@ Although it is recommended to use `byethrow` and `byenull` side by side, you can
 
 ## Structure
 
-| Package Name                                  | Version                                                                                                                         | Description           | Changelog                                   |
-|-----------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|-----------------------|---------------------------------------------|
+| Package Name                          | Version                                                                                                       | Description           | Changelog                                  |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------------------------------ |
 | [`byenull`](packages/byethrow)        | [![npm version](https://badge.fury.io/js/byenull.svg)](https://www.npmjs.com/package/byenull)                 | Core package          | [CHANGELOG](packages/byenull/CHANGELOG.md) |
-| [`byenull-docs`](packages/docs)       | [![npm version](https://badge.fury.io/js/byenull-docs.svg)](https://www.npmjs.com/package/byenull-docs)       | Documentation package | [CHANGELOG](packages/docs/CHANGELOG.md)     |
-| [`byenull-oxlint`](packages/oxlint)   | [![npm version](https://badge.fury.io/js/byenull-oxlint.svg)](https://www.npmjs.com/package/byenull-oxlint)   | Oxlint plugin package | [CHANGELOG](packages/oxlint/CHANGELOG.md)   |
-| [`byenull-testing`](packages/testing) | [![npm version](https://badge.fury.io/js/byenull-testing.svg)](https://www.npmjs.com/package/byenull-testing) | Testing package       | [CHANGELOG](packages/testing/CHANGELOG.md)  |
+| [`byenull-docs`](packages/docs)       | [![npm version](https://badge.fury.io/js/byenull-docs.svg)](https://www.npmjs.com/package/byenull-docs)       | Documentation package | [CHANGELOG](packages/docs/CHANGELOG.md)    |
+| [`byenull-oxlint`](packages/oxlint)   | [![npm version](https://badge.fury.io/js/byenull-oxlint.svg)](https://www.npmjs.com/package/byenull-oxlint)   | Oxlint plugin package | [CHANGELOG](packages/oxlint/CHANGELOG.md)  |
+| [`byenull-testing`](packages/testing) | [![npm version](https://badge.fury.io/js/byenull-testing.svg)](https://www.npmjs.com/package/byenull-testing) | Testing package       | [CHANGELOG](packages/testing/CHANGELOG.md) |
 
 ## 🤝 Contributing
 
@@ -31,4 +31,4 @@ Feel free to check [issues page](https://github.com/JohannesKlauss/byenull/issue
 
 ## 📝 License
 
-This project is [```MIT```](https://github.com/JohannesKlauss/byenull/blob/main/LICENSE) licensed.
+This project is [`MIT`](https://github.com/JohannesKlauss/byenull/blob/main/LICENSE) licensed.
