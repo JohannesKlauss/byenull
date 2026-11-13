@@ -31,6 +31,7 @@
     "prepublishOnly": "../../node_modules/.bin/vp run build"
   },
   "devDependencies": {
+    "@praha/byethrow": "0.13.0",
     "typescript": "catalog:",
     "vite-plus": "catalog:"
   },
