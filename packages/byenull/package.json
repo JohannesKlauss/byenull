@@ -33,5 +33,8 @@
   "devDependencies": {
     "typescript": "catalog:",
     "vite-plus": "catalog:"
+  },
+  "peerDependencies": {
+    "@praha-inc/byethrow": "^0"
   }
 }
