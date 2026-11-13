@@ -1,7 +1,7 @@
 import type { Option } from "../option";
 import { none } from "./none";
 
-export function some<T>(value: T): Option<T> {
+export function some<T>(value: T): Option<NonNullable<T>> {
   if (value === null || typeof value === "undefined") {
     return none();
   }
