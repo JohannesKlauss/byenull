@@ -41,7 +41,7 @@ describe("toResult", () => {
   });
 
   it("should transform a None to a failure with Error", () => {
-    const error = new Error("custom error")
+    const error = new Error("custom error");
 
     const result = toResult(error)(none());
 
