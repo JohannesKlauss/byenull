@@ -1,0 +1,209 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ========================================
+   TYPOGRAPHY
+======================================== */
+
+:root {
+  --font-sans: 'Poppins', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+html,
+body,
+button,
+input {
+  font-family: var(--font-sans);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+
+code,
+pre {
+  font-family: var(--font-mono);
+}
+
+
+/* ========================================
+   LIGHT THEME — CREAM VANILLA
+======================================== */
+
+:where(html:not(.rp-dark)) {
+  color-scheme: light;
+
+  /* Brand */
+  --rp-c-brand: #9A0002;
+  --rp-c-brand-light: #BD292D;
+  --rp-c-brand-lighter: #E8B7B3;
+  --rp-c-brand-dark: #790002;
+  --rp-c-brand-darker: #590002;
+  --rp-c-brand-tint: rgba(154, 0, 2, 0.10);
+
+  /* Backgrounds */
+  --rp-c-bg: #EFE6DE;
+  --rp-c-bg-soft: #F6EFE9;
+  --rp-c-bg-mute: #E7DCD2;
+  --rp-c-bg-alt: #E5D8CE;
+
+  /* Text */
+  --rp-c-text-0: #290B0B;
+  --rp-c-text-1: #391414;
+  --rp-c-text-2: #765B55;
+  --rp-c-text-3: #A58D84;
+  --rp-c-text-4: #C5B3AA;
+
+  /* Dividers */
+  --rp-c-divider: rgba(77, 22, 18, 0.20);
+  --rp-c-divider-light: rgba(77, 22, 18, 0.10);
+
+  /* Links */
+  --rp-c-link: #9A0002;
+
+  /* Inline code */
+  --rp-c-text-code: #9A0002;
+  --rp-c-text-code-bg: rgba(154, 0, 2, 0.07);
+  --rp-c-text-code-border: rgba(154, 0, 2, 0.10);
+
+  /* Code blocks */
+  --rp-code-block-color: #391414;
+  --rp-code-block-bg: #E8DDD4;
+  --rp-code-title-bg: #E0D2C8;
+  --rp-code-block-border: 1px solid rgba(77, 22, 18, 0.12);
+  --rp-code-block-shadow: none;
+
+  /* Syntax highlighting */
+  --shiki-foreground: #391414;
+  --shiki-background: transparent;
+  --shiki-token-constant: #9A0002;
+  --shiki-token-string: #687D43;
+  --shiki-token-comment: #9B8980;
+  --shiki-token-keyword: #A00027;
+  --shiki-token-parameter: #A56B27;
+  --shiki-token-function: #713E88;
+  --shiki-token-string-expression: #527B52;
+  --shiki-token-punctuation: #765B55;
+  --shiki-token-link: #9A0002;
+}
+
+
+/* ========================================
+   DARK THEME — NIGHTS
+======================================== */
+
+:where(html.rp-dark),
+:where(html.dark) {
+  color-scheme: dark;
+
+  /* Brand */
+  --rp-c-brand: #D7263D;
+  --rp-c-brand-light: #F04459;
+  --rp-c-brand-lighter: #F58A96;
+  --rp-c-brand-dark: #B91E34;
+  --rp-c-brand-darker: #941629;
+  --rp-c-brand-tint: rgba(215, 38, 61, 0.14);
+
+  /* Backgrounds */
+  --rp-c-bg: #02182B;
+  --rp-c-bg-soft: #062438;
+  --rp-c-bg-mute: #0B3045;
+  --rp-c-bg-alt: #031D32;
+
+  /* Text */
+  --rp-c-text-0: #F5EDE7;
+  --rp-c-text-1: #E9DFD9;
+  --rp-c-text-2: #A8B7C1;
+  --rp-c-text-3: #718997;
+  --rp-c-text-4: #496575;
+
+  /* Dividers */
+  --rp-c-divider: rgba(202, 222, 233, 0.18);
+  --rp-c-divider-light: rgba(202, 222, 233, 0.09);
+
+  /* Links */
+  --rp-c-link: #F04459;
+
+  /* Inline code */
+  --rp-c-text-code: #FF8290;
+  --rp-c-text-code-bg: rgba(215, 38, 61, 0.12);
+  --rp-c-text-code-border: rgba(215, 38, 61, 0.16);
+
+  /* Code blocks */
+  --rp-code-block-color: #E9DFD9;
+  --rp-code-block-bg: #062438;
+  --rp-code-title-bg: #0B3045;
+  --rp-code-block-border: 1px solid rgba(202, 222, 233, 0.12);
+  --rp-code-block-shadow: none;
+
+  /* Syntax highlighting */
+  --shiki-foreground: #E9DFD9;
+  --shiki-background: transparent;
+  --shiki-token-constant: #82B9F5;
+  --shiki-token-string: #A8D49B;
+  --shiki-token-comment: #718997;
+  --shiki-token-keyword: #F04459;
+  --shiki-token-parameter: #F4B66A;
+  --shiki-token-function: #C6A0F6;
+  --shiki-token-string-expression: #A8D49B;
+  --shiki-token-punctuation: #A8B7C1;
+  --shiki-token-link: #FF8290;
+}
+
+
+/* ========================================
+   COMPONENT POLISH
+======================================== */
+
+/* Selection */
+::selection {
+  background: #D7263D;
+  color: #FFFFFF;
+}
+
+/* Links */
+.rp-doc a {
+  text-decoration-color: rgba(215, 38, 61, 0.4);
+  text-underline-offset: 4px;
+  transition: color 0.2s ease;
+}
+
+/* Buttons */
+.rp-button {
+  border-radius: 8px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+}
+
+/* Navigation */
+.rp-nav {
+  backdrop-filter: blur(16px);
+}
+
+/* Code blocks */
+.rp-codeblock {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Inline code */
+.rp-doc :not(pre) > code {
+  border-radius: 5px;
+  padding: 2px 5px;
+}
+
+/* Sidebar */
+.rp-sidebar {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+}
+
+/* Smooth theme transitions */
+html,
+body {
+  transition:
+          background-color 0.25s ease,
+          color 0.25s ease;
+}

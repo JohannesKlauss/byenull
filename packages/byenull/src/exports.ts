@@ -1,3 +1,4 @@
+export * from './option'
 export * from './functions/and-then'
 export * from './functions/fn'
 export * from './functions/from-result'
