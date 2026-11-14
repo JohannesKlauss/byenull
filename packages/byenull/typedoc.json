@@ -1,0 +1,22 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["./src/index.ts"],
+  "tsconfig": "./tsconfig.json",
+  "plugin": ["typedoc-plugin-markdown"],
+  "router": "kind",
+  "readme": "none",
+  "indexFormat": "table",
+  "hidePageHeader": true,
+  "hideBreadcrumbs": true,
+  "categoryOrder": [
+    "Core Types",
+    "Infer Types",
+    "Creators",
+    "Combinators",
+    "Unwraps",
+    "Type Guards",
+    "Interop",
+    "Utilities",
+    "*"
+  ]
+}

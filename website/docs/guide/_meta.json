@@ -1,12 +1,22 @@
 [
   {
-    "type": "dir-section-header",
+    "type": "dir",
     "name": "start",
     "label": "Getting Started"
   },
   {
-    "type": "dir-section-header",
-    "name": "use-mdx",
-    "label": "Markdown & MDX"
+    "type": "dir",
+    "name": "tutorial",
+    "label": "Tutorial"
+  },
+  {
+    "type": "dir",
+    "name": "how-to",
+    "label": "How-to guides"
+  },
+  {
+    "type": "dir",
+    "name": "explanation",
+    "label": "Explanation"
   }
 ]

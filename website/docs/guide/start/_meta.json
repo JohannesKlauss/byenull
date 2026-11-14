@@ -1,1 +1,17 @@
-["introduction", "getting-started"]
+[
+  {
+    "type": "file",
+    "name": "introduction",
+    "label": "Introduction"
+  },
+  {
+    "type": "file",
+    "name": "why",
+    "label": "Why byenull?"
+  },
+  {
+    "type": "file",
+    "name": "quick",
+    "label": "Quick start"
+  }
+]

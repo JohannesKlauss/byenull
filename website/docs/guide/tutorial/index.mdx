@@ -1,0 +1,35 @@
+---
+description: "The byenull tutorial: build a type-safe profile lookup step by step, from the Option type through pipelines to byethrow interop."
+---
+
+# Tutorial
+
+This tutorial builds a small, realistic project with byenull: a **profile lookup**. We start from a user directory full of nullable values, and end with a pipeline that finds a user, reads their optional profile, fetches their avatar, and produces either a guaranteed value or a typed failure, with every "maybe it's not there" handled once, at the source.
+
+Each chapter adds one piece and shows its result. The chapters follow the shape of the library, so by the end you have used every function byenull has.
+
+## Basics
+
+What an Option is, how to create one, and how to look inside safely.
+
+- [Option type](./basics/option-type): the `Some` / `None` union and the project we will build
+- [Creating Options](./basics/creating-options): `some`, `none`, `fn`, and `maybe`
+- [Checking Options](./basics/checking-options): `isSome`, `isNone`, and `isOption`
+
+## Transforming
+
+Composing lookups into pipelines that handle absence automatically.
+
+- [Pipe basics](./transforming/pipe-basics): `pipe`, the heart of the library
+- [Mapping Options](./transforming/mapping-options): transforming values with `map`
+- [Chaining Options](./transforming/chaining-options): sequencing lookups with `andThen`
+- [Recovering Options](./transforming/recovering-options): fallbacks with `orElse`
+
+## Resolving
+
+Ending a pipeline: getting a value out, or crossing into Results.
+
+- [Unwrapping Options](./resolving/unwrapping-options): extracting values with `unwrap`
+- [Converting to Results](./resolving/converting-to-results): `toResult` and `fromResult` with @praha/byethrow
+
+New to the library? Start with [Why byenull?](../start/why) or jump straight into the [first chapter](./basics/option-type).

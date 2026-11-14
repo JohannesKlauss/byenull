@@ -1,0 +1,17 @@
+[
+  {
+    "type": "file",
+    "name": "option-type",
+    "label": "Option type"
+  },
+  {
+    "type": "file",
+    "name": "creating-options",
+    "label": "Creating Options"
+  },
+  {
+    "type": "file",
+    "name": "checking-options",
+    "label": "Checking Options"
+  }
+]

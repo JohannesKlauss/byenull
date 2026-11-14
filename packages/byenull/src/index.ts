@@ -1,72 +1,76 @@
 /**
  * Re-exports core Option-handling utilities under two convenient namespaces:
  *
- * - `Option`: Verbose and explicit usage
- * - `O`: Shorthand alias for more concise code
+ * - `Option`: verbose and explicit usage
+ * - `O`: shorthand alias for more concise code
  *
- * @example Basic Usage
+ * @example Basic usage
  * ```ts
  * import { Option } from 'byenull';
  *
- * const divideByZero = (x: number, y: number) => {
- *   if (y === 0) {
- *     return Option.none();
- *   }
- *   return Option.some(x / y);
- * };
+ * type User = { id: string; name: string };
+ * type Article = { title: string; author: User };
+ *
+ * const users: User[] = [{ id: 'u123', name: 'Alice' }];
+ * const articles: Article[] = [
+ *   { title: 'Hello byenull', author: { id: 'u123', name: 'Alice' } },
+ * ];
  *
  * const findUser = Option.fn((id: string, users: User[]) =>
- *   return users.find(u => u.id === id);
+ *   users.find((user) => user.id === id),
  * );
  *
- * const filterArticlesByUserName = Option.fn((userName: string, articles: Article[]) =>
- *   return articles.find(a => a.author.name === user.name);
+ * const findArticleByUserName = Option.fn((userName: string, articles: Article[]) =>
+ *   articles.find((article) => article.author.name === userName),
  * );
  *
- * const articles = Option.pipe(
- *   findUser("u213", userList)
- *   Option.map(user => user.name),
- *   Option.andThen(name => filterArticlesByUserName(name, articleList)),
+ * const article = Option.pipe(
+ *   Option.some('u123'),
+ *   Option.andThen((id) => findUser(id, users)),
+ *   Option.map((user) => user.name),
+ *   Option.andThen((name) => findArticleByUserName(name, articles)),
  * );
  *
- * if (Option.isSuccess(articles)) {
- *   console.log(articles.value); // Articles for username
+ * if (Option.isSome(article)) {
+ *   console.log(article.value); // { title: 'Hello byenull', author: { ... } }
  * }
  * ```
  *
- * @example Shorthand Usage
+ * @example Shorthand usage
  * ```ts
  * import { O } from 'byenull';
  *
- * const divideByZero = (x: number, y: number) => {
- *   if (y === 0) {
- *     return O.none();
- *   }
- *   return O.some(x / y);
- * };
+ * type User = { id: string; name: string };
+ * type Article = { title: string; author: User };
+ *
+ * const users: User[] = [{ id: 'u123', name: 'Alice' }];
+ * const articles: Article[] = [
+ *   { title: 'Hello byenull', author: { id: 'u123', name: 'Alice' } },
+ * ];
  *
  * const findUser = O.fn((id: string, users: User[]) =>
- *   return users.find(u => u.id === id);
+ *   users.find((user) => user.id === id),
  * );
  *
- * const filterArticlesByUserName = O.fn((userName: string, articles: Article[]) =>
- *   return articles.find(a => a.author.name === user.name);
+ * const findArticleByUserName = O.fn((userName: string, articles: Article[]) =>
+ *   articles.find((article) => article.author.name === userName),
  * );
  *
- * const articles = O.pipe(
- *   findUser("u213")
- *   O.map(user => user.name),
- *   O.andThen(filterArticlesByUserName),
+ * const article = O.pipe(
+ *   O.some('u123'),
+ *   O.andThen((id) => findUser(id, users)),
+ *   O.map((user) => user.name),
+ *   O.andThen((name) => findArticleByUserName(name, articles)),
  * );
  *
- * if (O.isSuccess(articles)) {
- *   console.log(articles.value); // Articles for username
+ * if (O.isSome(article)) {
+ *   console.log(article.value); // { title: 'Hello byenull', author: { ... } }
  * }
  * ```
  */
-export * as Option from './exports';
+export * as Option from "./exports";
 
 /**
  * Shorthand alias for {@link Option}.
  */
-export * as O from './exports';
+export * as O from "./exports";

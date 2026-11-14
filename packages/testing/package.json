@@ -2,6 +2,13 @@
   "name": "byenull-testing",
   "version": "0.1.0",
   "description": "Testing utilities for for byenull.",
+  "keywords": [
+    "functional",
+    "null",
+    "option",
+    "test",
+    "undefined"
+  ],
   "homepage": "https://github.com/JohannesKlauss/byenull#readme",
   "bugs": {
     "url": "https://github.com/JohannesKlauss/byenull/issues"
@@ -13,13 +20,6 @@
     "url": "git+https://github.com/JohannesKlauss/byenull.git",
     "directory": "packages/testing"
   },
-  "keywords": [
-    "option",
-    "null",
-    "undefined",
-    "functional",
-    "test"
-  ],
   "files": [
     "dist"
   ],

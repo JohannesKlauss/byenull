@@ -4,6 +4,45 @@ import type { Option, OptionAsync } from "../option";
 import { none } from "./none";
 import { some } from "./some";
 
+/**
+ * Converts a Result from
+ * {@link https://github.com/praha-inc/byethrow | @praha/byethrow} into an
+ * {@link Option}.
+ *
+ * A `Success` becomes a {@link Some} of its value; a `Failure` becomes a
+ * {@link None} and the error is discarded, so convert with {@link toResult}
+ * instead when the error carries information you need. When the input is a
+ * `ResultAsync`, an {@link OptionAsync} is returned.
+ *
+ * @typeParam T - The success value type of the `Result`.
+ *
+ * @param result - The `Result` (or `ResultAsync`) to convert.
+ *
+ * @returns An `Option` of the success value, or an `OptionAsync` when the
+ * input is asynchronous.
+ *
+ * @example Success case
+ * ```ts
+ * import { Option } from 'byenull';
+ * import { Result } from '@praha/byethrow';
+ *
+ * const option = Option.fromResult(Result.succeed(2));
+ * // { type: 'Some', value: 2 }
+ * ```
+ *
+ * @example Failure case
+ * ```ts
+ * import { Option } from 'byenull';
+ * import { Result } from '@praha/byethrow';
+ *
+ * const option = Option.fromResult(Result.fail(new Error('Something went wrong')));
+ * // { type: 'None' }
+ * ```
+ *
+ * @see {@link toResult} - For the opposite direction.
+ *
+ * @category Interop
+ */
 export function fromResult<T>(result: R.Result<T, any>): Option<T>;
 export function fromResult<T>(result: R.ResultAsync<T, any>): OptionAsync<T>;
 export function fromResult<T>(result: any) {

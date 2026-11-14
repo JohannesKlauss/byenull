@@ -5,12 +5,8 @@
     "activeMatch": "/guide/"
   },
   {
-    "text": "API",
-    "link": "/api/",
+    "text": "API Reference",
+    "link": "/api/modules/Option",
     "activeMatch": "/api/"
-  },
-  {
-    "text": "Document",
-    "link": "https://rspress.rs/"
   }
 ]

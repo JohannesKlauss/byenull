@@ -3,9 +3,52 @@ import { isPromise } from "../internals/is-promise";
 import type { Option, OptionAsync } from "../option";
 import { isSome } from "./is-some";
 
+/**
+ * Converts an {@link Option} into a Result from
+ * {@link https://github.com/praha-inc/byethrow | @praha/byethrow}.
+ *
+ * A {@link Some} becomes a `Success` holding the value; a {@link None}
+ * becomes a `Failure` holding the given error. When the input is an
+ * {@link OptionAsync}, a `ResultAsync` is returned.
+ *
+ * @typeParam E - The type of the error for the resulting `Failure`.
+ *
+ * @param err - The error to use when the `Option` is a `None`.
+ *
+ * @returns A function that takes an `Option` (or `OptionAsync`) and returns
+ * the corresponding `Result` (or `ResultAsync`).
+ *
+ * @example Some case
+ * ```ts
+ * import { Option } from 'byenull';
+ *
+ * const result = Option.pipe(
+ *   Option.some(2),
+ *   Option.toResult(new Error('No value')),
+ * );
+ * // { type: 'Success', value: 2 }
+ * ```
+ *
+ * @example None case
+ * ```ts
+ * import { Option } from 'byenull';
+ *
+ * const result = Option.pipe(
+ *   Option.none(),
+ *   Option.toResult(new Error('No value')),
+ * );
+ * // { type: 'Failure', error: Error('No value') }
+ * ```
+ *
+ * @see {@link fromResult} - For the opposite direction.
+ *
+ * @category Interop
+ */
 export function toResult<E>(err: E) {
-  function convert<T>(option: Option<T>): R.Result<T, E>;
+  // The Option overload must come last: TypeScript uses the final overload
+  // when contextually typing the returned function, e.g. inside `pipe`.
   function convert<T>(option: OptionAsync<T>): R.ResultAsync<T, E>;
+  function convert<T>(option: Option<T>): R.Result<T, E>;
   function convert<T>(option: Option<T> | OptionAsync<T>) {
     const apply = (o: Option<T>) => {
       if (isSome(o)) {

@@ -1,0 +1,179 @@
+---
+description: How Option.pipe chains operations from top to bottom instead of nested calls or intermediate variables, how a None short-circuits a pipeline, and how async steps are handled.
+---
+
+# Pipe basics
+
+In this chapter we will rewire our profile lookup as a pipeline. `pipe` is the heart of byenull: it connects multiple operations into a single, readable flow that runs from top to bottom.
+
+## What is `pipe`?
+
+`pipe` takes an initial value and passes it through a series of functions.
+Each function receives the output of the previous one:
+
+```ts
+import { Option } from "byenull";
+
+const result = Option.pipe(
+  5, // Start with 5
+  (x) => x + 1, // 5 + 1 = 6
+  (x) => x * 2, // 6 * 2 = 12
+  (x) => `Result: ${x}`, // 'Result: 12'
+);
+// 'Result: 12'
+```
+
+`pipe` is a general utility. It works with any unary functions, not just byenull's.
+
+## Why use `pipe`?
+
+Without `pipe`, we either nest function calls, which must be read from the inside out:
+
+```ts
+declare const addOne: (x: number) => number;
+declare const double: (x: number) => number;
+declare const format: (x: number) => string;
+// ---cut-before---
+// ❌ Hard to read: inside out
+const result = format(double(addOne(5)));
+```
+
+Or we introduce intermediate variables, which is verbose:
+
+```ts
+declare const addOne: (x: number) => number;
+declare const double: (x: number) => number;
+declare const format: (x: number) => string;
+// ---cut-before---
+// ❌ Verbose: too many variables
+const step1 = addOne(5);
+const step2 = double(step1);
+const result = format(step2);
+```
+
+With `pipe`, the steps are listed in the order they run:
+
+```ts
+declare const addOne: (x: number) => number;
+declare const double: (x: number) => number;
+declare const format: (x: number) => string;
+// ---cut-before---
+import { Option } from "byenull";
+
+// ✅ Clear: top to bottom
+const result = Option.pipe(5, addOne, double, format);
+```
+
+## Using `pipe` with Options
+
+The real power shows when the value is an `Option`.
+Functions such as `Option.map` are curried: calling them with a callback returns a function that takes an Option, exactly what `pipe` expects:
+
+```ts
+import { Option } from "byenull";
+
+type User = { id: string; name: string };
+
+const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
+
+const users: User[] = [{ id: "u1", name: "Alice" }];
+
+const option = Option.pipe(
+  Option.some("u1"),
+  Option.andThen((id) => findUser(id, users)),
+  Option.map((user) => user.name),
+);
+// { type: 'Some', value: 'Alice' }
+```
+
+### A None short-circuits the pipeline
+
+Each function only runs its callback when there is a value to work with.
+Once a step comes up empty, the following value-side steps are skipped and the `None` flows straight to the end:
+
+```ts
+import { Option } from "byenull";
+
+const option = Option.pipe(
+  Option.some("u404"),
+  Option.andThen((): Option.Option<number> => Option.none()),
+  Option.map((x) => x * 2), // Skipped
+  Option.map((x) => x + 5), // Skipped
+);
+// { type: 'None' }
+```
+
+This is why we don't need to check for absence after every step. The checking from the last chapter happens once, inside the pipeline.
+
+## Our project as a pipeline
+
+Here is the `displayName` function from the checking chapter, rebuilt as a pipeline:
+
+```ts
+import { Option } from "byenull";
+
+type User = { id: string; name: string };
+type Profile = { userId: string; displayName?: string };
+
+const users: User[] = [
+  { id: "u1", name: "Alice" },
+  { id: "u2", name: "Bob" },
+];
+const profiles: Profile[] = [{ userId: "u1", displayName: "Alice A." }];
+
+const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
+const findProfile = Option.fn((userId: string, profiles: Profile[]) =>
+  profiles.find((profile) => profile.userId === userId),
+);
+
+const displayName = (id: string) =>
+  Option.pipe(
+    Option.some(id),
+    Option.andThen((id) => findUser(id, users)),
+    Option.andThen((user) => findProfile(user.id, profiles)),
+    Option.andThen((profile) => Option.some(profile.displayName)), // undefined becomes None
+    Option.unwrap("unknown"),
+  );
+
+displayName("u1"); // 'Alice A.'
+displayName("u2"); // 'unknown', no profile
+displayName("u404"); // 'unknown', no user
+```
+
+Every step is one line, absence flows through automatically, and the fallback lives at the very end.
+
+:::info
+`displayName` uses two functions we haven't met yet, `map` and `unwrap`. They are the subjects of the next chapters. The shape of the pipeline is what matters here.
+:::
+
+## Async Steps
+
+If any step returns a `Promise`, the rest of the pipeline runs asynchronously and `pipe` returns a `Promise`.
+We only `await` the final result:
+
+```ts
+import { Option } from "byenull";
+
+type Avatar = { url: string };
+
+const fetchAvatar = Option.fn(async (userId: string) => {
+  const response = await fetch(`/api/avatars/${userId}`);
+  return response.json() as Promise<Avatar | null>;
+});
+
+const avatarUrl = await Option.pipe(
+  Option.some("u1"),
+  Option.andThen(fetchAvatar), // async
+  Option.map((avatar) => avatar.url), // receives the resolved value
+);
+// Option<string>
+```
+
+## Functions in this chapter
+
+The following pages cover the functions we can use inside a pipeline.
+`map` transforms a value, `andThen` chains a step that can come up empty, and `orElse` recovers from an empty result.
+
+- [Mapping Options](./mapping-options)
+- [Chaining Options](./chaining-options)
+- [Recovering Options](./recovering-options)

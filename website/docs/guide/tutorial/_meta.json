@@ -1,0 +1,22 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "Overview"
+  },
+  {
+    "type": "dir",
+    "name": "basics",
+    "label": "Basics"
+  },
+  {
+    "type": "dir",
+    "name": "transforming",
+    "label": "Transforming"
+  },
+  {
+    "type": "dir",
+    "name": "resolving",
+    "label": "Resolving"
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "type": "file",
+    "name": "pipe-basics",
+    "label": "Pipe basics"
+  },
+  {
+    "type": "file",
+    "name": "mapping-options",
+    "label": "Mapping Options"
+  },
+  {
+    "type": "file",
+    "name": "chaining-options",
+    "label": "Chaining Options"
+  },
+  {
+    "type": "file",
+    "name": "recovering-options",
+    "label": "Recovering Options"
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "Overview"
+  },
+  {
+    "type": "file",
+    "name": "importing-option",
+    "label": "Choosing an import style"
+  },
+  {
+    "type": "file",
+    "name": "handling-nullish-values",
+    "label": "Handling nullish values"
+  },
+  {
+    "type": "file",
+    "name": "writing-async-pipelines",
+    "label": "Mixing sync and async"
+  },
+  {
+    "type": "file",
+    "name": "converting-between-option-and-result",
+    "label": "Converting between Option and Result"
+  },
+  {
+    "type": "file",
+    "name": "testing-options",
+    "label": "Testing Options"
+  }
+]

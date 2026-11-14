@@ -1,0 +1,17 @@
+---
+description: Why Options beat nullish checks, absence versus failure, the sync/async model, and the decisions behind byenull.
+---
+
+# Explanation
+
+These pages discuss the _why_ behind byenull: the reasoning, the trade-offs, the alternatives. They assume you know what the functions do (the [tutorial](../tutorial/index) and the [API reference](/api/modules/Option) cover that) and ask instead why the library looks the way it does.
+
+## Two ways to be empty
+
+- [Option vs null and undefined](./option-vs-null): why wrapping absence in a type beats repeated null checks
+- [Option vs Result](./option-vs-result): absence versus failure, and why byenull and byethrow are two libraries
+
+## How the library works
+
+- [The Sync/Async Model](./sync-and-async): how one API serves both `Option` and `Promise<Option>`
+- [Design Principles](./design-principles): plain objects, curried functions, normalization, and the reasoning behind each decision

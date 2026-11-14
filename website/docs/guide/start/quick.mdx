@@ -1,0 +1,172 @@
+---
+description: "Install byenull and learn the core workflow: create Options with some and none, wrap nullable lookups with fn, compose steps with pipe, map, and andThen, recover with orElse, and handle async lookups."
+---
+
+# Quick start
+
+This guide walks us through the core workflow of byenull in a few minutes.
+
+## Installation
+
+Install the package with your preferred package manager:
+
+```bash
+npm install byenull
+# or: pnpm add byenull
+# or: yarn add byenull
+# or: bun add byenull
+```
+
+## Your first Option
+
+An `Option` is either a **Some** that holds a value, or a **None** that holds nothing.
+Create them with `Option.some` and `Option.none`, and return them instead of `null` or `undefined`:
+
+```ts
+import { Option } from "byenull";
+
+const findUser = (id: string, users: Array<{ id: string; name: string }>) => {
+  const user = users.find((user) => user.id === id);
+  if (user === undefined) {
+    return Option.none();
+  }
+  return Option.some(user);
+};
+
+const users = [{ id: "u123", name: "John Doe" }];
+
+findUser("u123", users);
+// { type: 'Some', value: { id: 'u123', name: 'John Doe' } }
+
+findUser("u999", users);
+// { type: 'None' }
+```
+
+To read the value, first check which variant we have with `Option.isSome`.
+TypeScript then knows whether `value` is available:
+
+```ts
+import { Option } from "byenull";
+
+type User = { id: string; name: string };
+declare const findUser: (id: string, users: User[]) => Option.Option<User>;
+// ---cut-before---
+const users: User[] = [{ id: "u123", name: "John Doe" }];
+
+const user = findUser("u123", users);
+
+if (Option.isSome(user)) {
+  console.log(user.value); // { id: 'u123', name: 'John Doe' }
+} else {
+  console.log("No such user");
+}
+```
+
+## Wrapping nullable lookups
+
+Existing code returns `null` or `undefined` all the time: `find`, `Map.get`, DOM queries.
+`Option.fn` wraps such a function so that it returns an Option instead:
+
+```ts
+import { Option } from "byenull";
+
+type User = { id: string; name: string };
+const users: User[] = [
+  { id: "u123", name: "John Doe" },
+  { id: "u456", name: "Jane Doe" },
+];
+
+const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
+
+findUser("u123", users);
+// { type: 'Some', value: { id: 'u123', name: 'John Doe' } }
+
+findUser("u999", users);
+// { type: 'None' }
+```
+
+## Composing steps with `pipe`
+
+`Option.pipe` passes a value through a series of steps from top to bottom.
+Use `Option.andThen` for steps that can come up empty and return an Option, and `Option.map` for steps that simply transform the value:
+
+```ts
+import { Option } from "byenull";
+
+type User = { id: string; name: string };
+type Article = { title: string; authorId: string };
+const users: User[] = [{ id: "u123", name: "John Doe" }];
+const articles: Article[] = [
+  { title: "Hello Options", authorId: "u123" },
+  { title: "Goodbye Null", authorId: "u123" },
+];
+
+const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
+const findArticlesByAuthor = Option.fn((authorId: string, articles: Article[]) =>
+  articles.find((article) => article.authorId === authorId),
+);
+
+const article = Option.pipe(
+  Option.some("u123"),
+  Option.andThen((id) => findUser(id, users)),
+  Option.map((user) => user.name),
+  Option.andThen((name) => findArticlesByAuthor("u123", articles)),
+  Option.map((found) => found.title),
+);
+
+// article: Option.Option<string>
+// { type: 'Some', value: 'Hello Options' }
+```
+
+As soon as a step comes up empty, the remaining steps are skipped and the `None` is passed straight to the end of the pipeline.
+We don't need to check for absence after every step.
+
+## Recovering from an empty result
+
+Use `Option.orElse` to handle an empty result and continue with a fallback:
+
+```ts
+import { Option } from "byenull";
+
+declare const article: Option.Option<string>;
+// ---cut-before---
+const title = Option.pipe(
+  article,
+  Option.orElse(() => Option.some("Untitled")),
+);
+// { type: 'Some', value: 'Untitled' }
+```
+
+## Working with async operations
+
+Async functions work with exactly the same API.
+When any step returns a `Promise`, the whole pipeline becomes asynchronous, so we just `await` the result:
+
+```ts
+import { Option } from "byenull";
+
+type User = { id: string; name: string };
+const users: User[] = [{ id: "u123", name: "John Doe" }];
+
+const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
+
+const fetchAvatarUrl = Option.fn(async (user: User) => {
+  const response = await fetch(`/api/avatars/${user.id}`);
+  return response.json() as Promise<{ url: string } | null>;
+});
+
+const avatarUrl = await Option.pipe(
+  Option.some("u123"),
+  Option.andThen((id) => findUser(id, users)), // sync
+  Option.andThen(fetchAvatarUrl), // async
+  Option.map((avatar) => avatar.url),
+  Option.unwrap("https://example.com/default-avatar.png"),
+);
+// 'https://.../u123.png', or the fallback when anything came up empty
+```
+
+## Next steps
+
+- [Tutorial](../tutorial/basics/option-type): every function in depth, step by step
+- [How-to guides](../how-to/importing-option): recipes for real-world tasks
+- [API Reference](/api/modules/Option): look up any signature
