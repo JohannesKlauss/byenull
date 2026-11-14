@@ -4,21 +4,13 @@ import type { Option, OptionAsync } from "../option";
 import { isSome } from "./is-some";
 
 /**
- * Converts an {@link Option} into a Result from
+ * Converts an {@link Option} or {@link OptionAsync} into a Result from
  * {@link https://github.com/praha-inc/byethrow | @praha/byethrow}.
+ * A {@link Some} becomes a `Success`; a {@link None} becomes a `Failure` containing `err`.
  *
- * A {@link Some} becomes a `Success` holding the value; a {@link None}
- * becomes a `Failure` holding the given error. When the input is an
- * {@link OptionAsync}, a `ResultAsync` is returned.
+ * @typeParam E - The error type for a `Failure`.
  *
- * @typeParam E - The type of the error for the resulting `Failure`.
- *
- * @param err - The error to use when the `Option` is a `None`.
- *
- * @returns A function that takes an `Option` (or `OptionAsync`) and returns
- * the corresponding `Result` (or `ResultAsync`).
- *
- * @example Some case
+ * @example Some Case
  * ```ts
  * import { Option } from 'byenull';
  *
@@ -29,7 +21,7 @@ import { isSome } from "./is-some";
  * // { type: 'Success', value: 2 }
  * ```
  *
- * @example None case
+ * @example None Case
  * ```ts
  * import { Option } from 'byenull';
  *

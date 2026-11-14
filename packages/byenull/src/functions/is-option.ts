@@ -1,16 +1,11 @@
 import type { NonNullableValue, Option } from "../option";
 
 /**
- * Checks whether an unknown value is an {@link Option}.
+ * Type guard to check if a value is an {@link Option}.
  *
- * A value is an `Option` when it is an object with a `type` property of
- * `"Some"` (with a `value` property) or `"None"`.
- *
- * @typeParam T - The value type of the `Option` to check for.
- *
+ * @typeParam T - The type of the value.
  * @param option - The value to check.
- *
- * @returns `true` when the value is an `Option`.
+ * @returns `true` if the value is an {@link Option}, otherwise `false`.
  *
  * @example
  * ```ts

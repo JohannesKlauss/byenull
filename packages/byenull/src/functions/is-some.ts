@@ -1,16 +1,11 @@
 import type { Option } from "../option";
 
 /**
- * Checks whether an {@link Option} is a {@link Some}.
+ * Type guard to check if an {@link Option} is a {@link Some}.
  *
- * Beyond the boolean result, the returned type predicate narrows the type so
- * that `value` is accessible without a cast.
- *
- * @typeParam O - The `Option` type to check.
- *
- * @param option - The `Option` to check.
- *
- * @returns `true` when the `Option` is a `Some`.
+ * @typeParam O - The Option type to check.
+ * @param option - The {@link Option} to check.
+ * @returns `true` if the option is a {@link Some}, otherwise `false`.
  *
  * @example
  * ```ts

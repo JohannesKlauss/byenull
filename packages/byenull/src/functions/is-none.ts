@@ -1,16 +1,11 @@
 import type { None, Option } from "../option";
 
 /**
- * Checks whether an {@link Option} is a {@link None}.
+ * Type guard to check if an {@link Option} is a {@link None}.
  *
- * Beyond the boolean result, the returned type predicate narrows the type so
- * that the absence of `value` is known to the compiler.
- *
- * @typeParam O - The `Option` type to check.
- *
- * @param option - The `Option` to check.
- *
- * @returns `true` when the `Option` is a `None`.
+ * @typeParam O - The Option type to check.
+ * @param option - The {@link Option} to check.
+ * @returns `true` if the option is a {@link None}, otherwise `false`.
  *
  * @example
  * ```ts

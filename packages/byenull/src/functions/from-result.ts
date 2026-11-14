@@ -7,21 +7,12 @@ import { some } from "./some";
 /**
  * Converts a Result from
  * {@link https://github.com/praha-inc/byethrow | @praha/byethrow} into an
- * {@link Option}.
+ * {@link Option} or {@link OptionAsync}.
+ * A `Success` becomes a {@link Some}; a `Failure` becomes a {@link None}, discarding the error.
  *
- * A `Success` becomes a {@link Some} of its value; a `Failure` becomes a
- * {@link None} and the error is discarded, so convert with {@link toResult}
- * instead when the error carries information you need. When the input is a
- * `ResultAsync`, an {@link OptionAsync} is returned.
+ * @typeParam T - The success value type.
  *
- * @typeParam T - The success value type of the `Result`.
- *
- * @param result - The `Result` (or `ResultAsync`) to convert.
- *
- * @returns An `Option` of the success value, or an `OptionAsync` when the
- * input is asynchronous.
- *
- * @example Success case
+ * @example Success Case
  * ```ts
  * import { Option } from 'byenull';
  * import { Result } from '@praha/byethrow';
@@ -30,7 +21,7 @@ import { some } from "./some";
  * // { type: 'Some', value: 2 }
  * ```
  *
- * @example Failure case
+ * @example Failure Case
  * ```ts
  * import { Option } from 'byenull';
  * import { Result } from '@praha/byethrow';

@@ -4,21 +4,13 @@ import { isNone } from "./is-none";
 import { some } from "./some";
 
 /**
- * Transforms the value inside a {@link Some}.
+ * Applies a transformation function to the value of an {@link Option} or {@link OptionAsync}.
  * If the input is a {@link None}, it is returned unchanged.
  *
- * When the input is an {@link OptionAsync}, the transformation is applied to
- * the resolved `Option` and an `OptionAsync` is returned.
- *
- * @typeParam T - The input value type.
+ * @typeParam O - The input {@link Option} or {@link OptionAsync}.
  * @typeParam U - The transformed value type.
  *
- * @param fn - The transformation to apply to the value of a `Some`.
- *
- * @returns A function that takes an `Option` (or `OptionAsync`) and returns
- * the transformed `Option` in the same synchronicity.
- *
- * @example Some case
+ * @example Some Case
  * ```ts
  * import { Option } from 'byenull';
  *
@@ -29,7 +21,7 @@ import { some } from "./some";
  * // { type: 'Some', value: 20 }
  * ```
  *
- * @example None case (unchanged)
+ * @example None Case (unchanged)
  * ```ts
  * import { Option } from 'byenull';
  *

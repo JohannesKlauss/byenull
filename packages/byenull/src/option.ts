@@ -1,10 +1,7 @@
 import type { HasPromise } from "./internals/has-promise";
 
 /**
- * The type of a value that is neither `null` nor `undefined`.
- *
- * Accepts every type except `null` and `undefined`, which is exactly the set
- * of values an {@link Option} can hold in its {@link Some} variant.
+ * A value that is neither `null` nor `undefined`.
  *
  * @category Core Types
  */
@@ -32,31 +29,19 @@ export type None = {
 };
 
 /**
- * Represents the presence or absence of a value.
+ * A union type representing either a {@link Some} or a {@link None}.
  *
- * An `Option` is always one of two variants:
- *
- * - {@link Some}: the operation produced a value.
- * - {@link None}: the operation produced no value.
- *
- * Because it is a plain object with a `type` property, an `Option` can be
- * logged, serialized to JSON, or compared in tests as it is.
- *
- * @typeParam T - The type of the value held by a {@link Some}.
+ * @typeParam T - The type of the {@link Some} value.
  *
  * @example
  * ```ts
  * import { Option } from 'byenull';
  *
- * const divide = (a: number, b: number): Option.Option<number> => {
- *   if (b === 0) {
- *     return Option.none();
- *   }
- *   return Option.some(a / b);
+ * const doSomething = (): Option.Option<number> => {
+ *   return Math.random() > 0.5
+ *     ? Option.some(10)
+ *     : Option.none();
  * };
- *
- * divide(10, 2); // { type: 'Some', value: 5 }
- * divide(10, 0); // { type: 'None' }
  * ```
  *
  * @category Core Types
@@ -64,50 +49,37 @@ export type None = {
 export type Option<T> = Some<T> | None;
 
 /**
- * An asynchronous {@link Option}: the `Promise` of an `Option`.
+ * An asynchronous variant of {@link Option}, wrapped in a `Promise`.
  *
- * Produced by {@link fn} and {@link maybe} when they wrap an asynchronous
- * function, and by every transformer when its input is asynchronous.
- *
- * @typeParam T - The type of the value held by a {@link Some}.
+ * @typeParam T - The type of the {@link Some} value.
  *
  * @category Core Types
  */
 export type OptionAsync<T> = Promise<Option<T>>;
 
 /**
- * An {@link Option} that may already be resolved, or may still be a `Promise`.
+ * An option that may be either synchronous or asynchronous.
  *
- * Every transformer in this package accepts this type and dispatches on it:
- * a resolved `Option` is transformed synchronously, a `Promise` is awaited
- * and the result is an {@link OptionAsync}.
- *
- * @typeParam T - The type of the value held by a {@link Some}.
+ * @typeParam T - The type of the {@link Some} value.
  *
  * @category Core Types
  */
 export type OptionMaybeAsync<T> = Option<T> | Promise<Option<T>>;
 
 /**
- * Resolves to {@link OptionAsync} when `O` may be a `Promise`, otherwise to
- * {@link Option}.
+ * Resolves to the appropriate Option type (sync or async) based on the input type.
  *
- * Used as the return type of every transformer so that a synchronous input
- * yields a synchronous `Option` and an asynchronous input yields an
- * `OptionAsync`, without separate APIs.
- *
- * @typeParam O - The input type that may contain a `Promise`.
- * @typeParam T - The type of the value held by the resulting {@link Some}.
+ * @typeParam O - The reference type to inspect for a Promise.
+ * @typeParam T - The type of the {@link Some} value.
  *
  * @category Infer Types
  */
 export type OptionFor<O, T> = true extends HasPromise<O> ? OptionAsync<T> : Option<T>;
 
 /**
- * Infers the value type of an {@link Option}, {@link OptionAsync}, or a
- * function returning either.
+ * Infers the {@link Some} value type `T` from an Option or a function returning an Option.
  *
- * @typeParam T - The type to infer the value type from.
+ * @typeParam T - An {@link OptionMaybeAsync} type or a function returning it.
  *
  * @example
  * ```ts

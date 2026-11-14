@@ -4,22 +4,14 @@ import { none } from "./none";
 import { some } from "./some";
 
 /**
- * Runs a thunk and wraps its result in an {@link Option}.
+ * Executes a function and wraps its result in an {@link Option} or {@link OptionAsync}.
  *
- * Returns a {@link Some} of the thunk's return value, or a {@link None} when
- * it returns `null` or `undefined`. When it returns a `Promise`, the result
- * is an {@link OptionAsync}: the promise resolves to a `Some` of the resolved
- * value, or to a `None` when it rejects or resolves with a nullish value. A
- * synchronous throw is not captured and propagates to the caller.
+ * Nullish values and Promise rejections produce {@link None}; synchronous throws are not captured.
  *
- * @typeParam F - The type of the thunk to run.
+ * @typeParam F - The function type to execute.
+ * @returns An {@link Option} or {@link OptionAsync} wrapping the function's return value.
  *
- * @param fn - The thunk to run.
- *
- * @returns An `Option` of the thunk's result, or an `OptionAsync` when the
- * thunk is asynchronous.
- *
- * @example Synchronous thunk
+ * @example Synchronous Thunk
  * ```ts
  * import { Option } from 'byenull';
  *
@@ -27,7 +19,7 @@ import { some } from "./some";
  * // { type: 'Some', value: HTMLElement } or { type: 'None' }
  * ```
  *
- * @example Asynchronous thunk
+ * @example Asynchronous Thunk
  * ```ts
  * import { Option } from 'byenull';
  *

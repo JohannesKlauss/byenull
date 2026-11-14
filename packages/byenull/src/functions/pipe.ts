@@ -16,13 +16,13 @@
  * ```ts
  * import { Option } from 'byenull';
  *
- * const option = Option.pipe(
- *   Option.some(2),
- *   Option.map((x) => x + 1),
- *   Option.map((x) => x * 3),
- *   Option.map((x) => `Result: ${x}`),
+ * const result = Option.pipe(
+ *   2,
+ *   x => x + 1,
+ *   x => x * 3,
+ *   x => `Result: ${x}`
  * );
- * // { type: 'Some', value: 'Result: 9' }
+ * // Result: 9
  * ```
  *
  * @category Utilities

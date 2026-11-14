@@ -3,21 +3,13 @@ import type { InferSome, Option, OptionFor, OptionMaybeAsync } from "../option";
 import { isNone } from "./is-none";
 
 /**
- * Chains the next computation using the value of a {@link Some}.
- * If the input is a {@link None}, it is returned unchanged and `fn` is never called.
+ * Chains the next computation using the value of an {@link Option} or {@link OptionAsync}.
+ * If the input is a {@link None}, it is returned unchanged.
+ * Otherwise, the provided function is called, and its result is returned as-is.
  *
- * When either the input or the output of `fn` is an {@link OptionAsync}, the
- * chain is asynchronous and an `OptionAsync` is returned.
+ * @typeParam F - The function type to chain.
  *
- * @typeParam F - The type of the function to chain.
- *
- * @param fn - A function that receives the value of a `Some` and returns an
- * `Option` (or `OptionAsync`).
- *
- * @returns A function that takes an `Option` (or `OptionAsync`) and returns
- * the chained `Option` in the resulting synchronicity.
- *
- * @example Some case
+ * @example Some Case
  * ```ts
  * import { Option } from 'byenull';
  *
@@ -28,7 +20,7 @@ import { isNone } from "./is-none";
  * // { type: 'Some', value: 4 }
  * ```
  *
- * @example None case (fn is never called)
+ * @example None Case (fn is never called)
  * ```ts
  * import { Option } from 'byenull';
  *
@@ -39,7 +31,7 @@ import { isNone } from "./is-none";
  * // { type: 'None' }
  * ```
  *
- * @example Asynchronous case
+ * @example Asynchronous Case
  * ```ts
  * import { Option } from 'byenull';
  *

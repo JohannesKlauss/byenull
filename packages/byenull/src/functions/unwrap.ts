@@ -5,20 +5,12 @@ import { isSome } from "./is-some";
 type Unwrapped<O, D, V = InferSome<O>> = O extends Promise<any> ? Promise<Awaited<V | D>> : V | D;
 
 /**
- * Extracts the value of a {@link Some}, or returns a default value for a {@link None}.
+ * Extracts the value from an {@link Option} or {@link OptionAsync}.
+ * If the input is a {@link None}, the default value is returned.
  *
- * The default value must be assignable to the `Option`'s value type, or be
- * `null` or `undefined`. When the input is an {@link OptionAsync}, a `Promise`
- * of the value or default is returned.
+ * @typeParam D - The default value type.
  *
- * @typeParam D - The type of the default value.
- *
- * @param defaultValue - The value to return for a `None`.
- *
- * @returns A function that takes an `Option` (or `OptionAsync`) and returns
- * its value, or the default value.
- *
- * @example Some case
+ * @example Some Case
  * ```ts
  * import { Option } from 'byenull';
  *
@@ -29,7 +21,7 @@ type Unwrapped<O, D, V = InferSome<O>> = O extends Promise<any> ? Promise<Awaite
  * // 2
  * ```
  *
- * @example None case
+ * @example None Case
  * ```ts
  * import { Option } from 'byenull';
  *
@@ -42,7 +34,7 @@ type Unwrapped<O, D, V = InferSome<O>> = O extends Promise<any> ? Promise<Awaite
  * // 0
  * ```
  *
- * @example Nullish default
+ * @example Nullish Default
  * ```ts
  * import { Option } from 'byenull';
  *

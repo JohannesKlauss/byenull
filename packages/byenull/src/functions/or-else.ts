@@ -3,20 +3,13 @@ import type { InferSome, Option, OptionFor, OptionMaybeAsync } from "../option";
 import { isSome } from "./is-some";
 
 /**
- * Recovers from a {@link None} by calling a fallback thunk.
- * If the input is a {@link Some}, it is returned unchanged and `fn` is never called.
+ * Chains a fallback computation for an {@link Option} or {@link OptionAsync}.
+ * If the input is a {@link Some}, it is returned unchanged.
+ * Otherwise, the provided function is called, and its result is returned as-is.
  *
- * When either the input or the output of `fn` is an {@link OptionAsync}, the
- * recovery is asynchronous and an `OptionAsync` is returned.
+ * @typeParam F - The fallback function type.
  *
- * @typeParam F - The type of the fallback thunk.
- *
- * @param fn - A thunk that returns the fallback `Option` (or `OptionAsync`).
- *
- * @returns A function that takes an `Option` (or `OptionAsync`) and returns
- * the original `Some` or the fallback `Option` in the resulting synchronicity.
- *
- * @example None case
+ * @example None Case
  * ```ts
  * import { Option } from 'byenull';
  *
@@ -27,7 +20,7 @@ import { isSome } from "./is-some";
  * // { type: 'Some', value: 'default' }
  * ```
  *
- * @example Some case (fn is never called)
+ * @example Some Case (fn is never called)
  * ```ts
  * import { Option } from 'byenull';
  *

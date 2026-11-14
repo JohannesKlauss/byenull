@@ -4,23 +4,14 @@ import { none } from "./none";
 import { some } from "./some";
 
 /**
- * Wraps a function so that its return value becomes an {@link Option}.
+ * Wraps a function and returns a new function that returns an {@link Option} or {@link OptionAsync}.
  *
- * The wrapped function keeps its parameters and returns a {@link Some} of
- * its return value, or a {@link None} when it returns `null` or `undefined`.
- * When it returns a `Promise`, the result is an {@link OptionAsync}: the
- * promise resolves to a `Some` of the resolved value, or to a `None` when it
- * rejects or resolves with a nullish value. A synchronous throw is not
- * captured and propagates to the caller.
+ * Nullish values and Promise rejections produce {@link None}; synchronous throws are not captured.
  *
- * @typeParam F - The type of the function to wrap.
+ * @typeParam F - The function type to wrap.
+ * @returns A new function that returns an {@link Option} or {@link OptionAsync}.
  *
- * @param fn - The function to wrap.
- *
- * @returns A function with the same parameters that returns an `Option` (or
- * an `OptionAsync` when the wrapped function is asynchronous).
- *
- * @example Synchronous function
+ * @example Synchronous Function
  * ```ts
  * import { Option } from 'byenull';
  *
@@ -34,7 +25,7 @@ import { some } from "./some";
  * // { type: 'Some', value: { id: 'u1', name: 'Alice' } }
  * ```
  *
- * @example Asynchronous function
+ * @example Asynchronous Function
  * ```ts
  * import { Option } from 'byenull';
  *

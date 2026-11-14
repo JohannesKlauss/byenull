@@ -2,16 +2,11 @@ import type { Option } from "../option";
 import { none } from "./none";
 
 /**
- * Creates a {@link Some} that holds the given value.
+ * Creates a {@link Some} from a given value.
+ * Passing `null` or `undefined` returns {@link None} instead.
  *
- * Passing `null` or `undefined` returns a {@link None} instead, so an
- * `Option` never holds a nullish value.
- *
- * @typeParam T - The type of the value to hold.
- *
- * @param value - The value to hold.
- *
- * @returns A `Some` holding the value, or a `None` when the value is nullish.
+ * @typeParam T - The type of the value to wrap.
+ * @returns A {@link Some} containing the value, or {@link None} if the value is nullish.
  *
  * @example
  * ```ts
