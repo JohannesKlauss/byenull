@@ -24,9 +24,9 @@
  * );
  *
  * const articles = Option.pipe(
- *   findUser("u213")
+ *   findUser("u213", userList)
  *   Option.map(user => user.name),
- *   Option.andThen(filterArticlesByUserName),
+ *   Option.andThen(name => filterArticlesByUserName(name, articleList)),
  * );
  *
  * if (Option.isSuccess(articles)) {
