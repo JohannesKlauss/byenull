@@ -1,113 +1,111 @@
 ---
-description: "Transforming the value inside an Option with map: applying functions to Some values, leaving None unchanged, and preserving the value's type through the pipeline."
+description: Transform values inside Options with map, including nullish normalization, asynchronous inputs, and the difference between map and andThen.
 ---
 
-# Mapping Options
+# Mapping options
 
-In this chapter we will transform values inside our pipeline with `map`. Where `andThen` chains a step that can come up empty, `map` simply changes what a `Some` holds.
+`map` transforms the value inside an `Option`. It changes the value without adding another way for the pipeline to fail.
 
-## Transforming a Some with `map`
+## Transforming values with `map`
 
-`map` applies a function to the value of a `Some`.
-A `None` passes through unchanged:
+For a `Some`, `map` calls the function and wraps the returned value. For a `None`, it skips the function and returns the `None` unchanged:
 
 ```ts
 import { Option } from "byenull";
 
 const option = Option.pipe(
   Option.some(2),
-  Option.map((x) => x * 10),
+  Option.map((value) => value * 10),
 );
 // { type: 'Some', value: 20 }
 
 const empty = Option.pipe(
   Option.none(),
-  Option.map((x: number) => x * 10),
+  Option.map((value: number) => value * 10),
+);
+// { type: 'None' }, the callback is not called
+```
+
+The callback can change the value type. Mapping a `User` to `user.name`, for example, produces an `Option<string>`.
+
+## Normalizing nullish callback results
+
+`map` passes the callback result through `some`. A callback that returns `null` or `undefined` therefore produces a `None`:
+
+```ts
+import { Option } from "byenull";
+
+type Profile = { displayName: string | null };
+
+const profile: Profile = { displayName: null };
+
+const displayName = Option.pipe(
+  Option.some(profile),
+  Option.map((profile) => profile.displayName),
 );
 // { type: 'None' }
 ```
 
-The callback only runs when there is a value. The second pipeline never calls its function.
+`some`, `fn`, and `maybe` apply the same normalization to the values they wrap. `fn` and `maybe` also convert Promise rejections to `None`. Synchronous throws still propagate.
 
-## Our project: building a display name
+## Mapping asynchronous Options
 
-Let's use `map` where our profile data is guaranteed once we have it, turning a profile into a label:
+`map` accepts an `OptionAsync`. It waits for the input and then runs its synchronous callback on the value:
 
 ```ts
 import { Option } from "byenull";
 
-type User = { id: string; name: string };
-type Profile = { userId: string; displayName?: string };
+const product = Promise.resolve(Option.some({ name: "Keyboard" }));
 
-const users: User[] = [
-  { id: "u1", name: "Alice" },
-  { id: "u2", name: "Bob" },
-];
-const profiles: Profile[] = [{ userId: "u1", displayName: "Alice A." }];
-
-const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
-
-const userLabel = Option.pipe(
-  findUser("u1", users),
-  Option.map((user) => `${user.name} (#${user.id})`),
+const name = await Option.pipe(
+  product,
+  Option.map((product) => product.name),
 );
-// { type: 'Some', value: 'Alice (#u1)' }
+// { type: 'Some', value: 'Keyboard' }
 ```
 
-Notice the types: `map` receives the `User` and its callback returns a `string`, so the result is an `Option<string>`. The transform flows into the pipeline's type automatically.
-
-## `map` works on async Options
-
-When the input is an `OptionAsync`, `map` waits for it and returns an `OptionAsync`, so no separate function is needed:
+Do not pass an `async` callback to `map`. The callback would return a Promise as an ordinary value, and `map` would not wait for the transformation. Use `andThen` with a callback that returns an `Option` or `OptionAsync` instead:
 
 ```ts
 import { Option } from "byenull";
 
-type Avatar = { url: string };
+const fetchProduct = Option.fn(async (id: string) => {
+  return id === "p1" ? { name: "Keyboard" } : null;
+});
 
-declare const fetchAvatar: (userId: string) => Promise<Option.Option<Avatar>>;
-// ---cut-before---
-const avatarUrl = await Option.pipe(
-  fetchAvatar("u1"), // OptionAsync<Avatar>
-  Option.map((avatar) => avatar.url),
+const name = await Option.pipe(
+  Option.some("p1"),
+  Option.andThen(fetchProduct),
+  Option.map((product) => product.name),
 );
-// Option<string>
+// { type: 'Some', value: 'Keyboard' }
 ```
 
-## When to use `map` and when to use `andThen`
+Here `andThen` runs the asynchronous lookup. The following `map` only formats the resolved product.
 
-Use `map` when the callback returns a plain value, and `andThen` when it returns an Option, typically because the next step can itself come up empty.
-If we accidentally use `map` with a function that returns an Option, we get an `Option` _inside_ an `Option`, which the pipeline won't flatten:
+## Choosing between `map` and `andThen`
+
+Use `map` for a synchronous transformation. Use `andThen` when the callback returns an `Option` or `OptionAsync`. `andThen` uses that Option as the next pipeline value instead of nesting it, and a `None` skips its callback:
 
 ```ts
 import { Option } from "byenull";
 
-type User = { id: string; name: string };
-type Profile = { userId: string; displayName?: string };
+type Profile = { nickname?: string };
 
-const users: User[] = [{ id: "u1", name: "Alice" }];
-const profiles: Profile[] = [];
-
-const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
-const findProfile = Option.fn((userId: string, profiles: Profile[]) =>
-  profiles.find((profile) => profile.userId === userId),
-);
+const profile: Profile = { nickname: "Ada" };
+const getNickname = Option.fn((profile: Profile) => profile.nickname);
 
 const nested = Option.pipe(
-  findUser("u1", users),
-  Option.map((user) => findProfile(user.id, profiles)),
+  Option.some(profile),
+  Option.map(getNickname),
 );
-// Option<Option<Profile>>, not what we want
+// { type: 'Some', value: { type: 'Some', value: 'Ada' } }
 
 const flat = Option.pipe(
-  findUser("u1", users),
-  Option.andThen((user) => findProfile(user.id, profiles)),
+  Option.some(profile),
+  Option.andThen(getNickname),
 );
-// Option<Profile>: { type: 'None' }, because Alice has no profile
+// { type: 'Some', value: 'Ada' }
 ```
 
-The next chapter makes `andThen` the star.
-
-## Next steps
-
-- [Chaining Options](./chaining-options): steps that can come up empty
+See [How to handle nullish values](../../how-to/handling-nullish-values) for ways to wrap nullable APIs before mapping them.

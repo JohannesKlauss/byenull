@@ -1,13 +1,13 @@
 ---
 pageType: home
 
-titleSuffix: A lightweight Option type library
-description: A lightweight, tree-shakable Option type library for type-safe nullable handling in TypeScript.
+titleSuffix: Option types for TypeScript
+description: An Option type for TypeScript with synchronous and asynchronous pipelines and conversions for @praha/byethrow.
 
 hero:
   name: byenull
-  text: A lightweight Option type package
-  tagline: Say goodbye to null and undefined
+  text: An Option type package
+  tagline: Represent values that may be absent
   actions:
     - theme: brand
       text: Introduction
@@ -15,33 +15,24 @@ hero:
     - theme: alt
       text: Quick start
       link: ./guide/start/quick
-    - theme: alt
-      text: GitHub
-      link: https://github.com/JohannesKlauss/byenull
 
 features:
-  - icon: 🌲
-    title: Tree-shakable
-    details: Every function is an independent export, so your bundle only includes what you use.
+  - title: Absence in the type
+    details: Some carries a value and None carries no value. Function signatures show when a result may be absent.
     link: ./guide/start/introduction
-  - icon: 🧱
-    title: Plain objects
-    details: An Option is a plain object, not a class instance, so it logs, serializes, and diffs like any other value.
-    link: ./guide/tutorial/basics/option-type
-  - icon: 🔀
-    title: One API for sync and async
-    details: Every function accepts both Option and Promise of Option. There are no separate async functions.
-    link: ./guide/explanation/sync-and-async
-  - icon: 🔗
-    title: Composable pipelines
-    details: Build readable top-to-bottom pipelines with pipe, map, andThen, and orElse.
+  - title: Plain objects
+    details: Options have a type field and an optional value field. Log, serialize, and compare them without class instances.
+    link: ./guide/start/introduction
+  - title: Promise-aware pipelines
+    details: map, andThen, orElse, unwrap, and the Result converters accept Options and Promises of Options.
+    link: ./guide/start/quick
+  - title: Composable steps
+    details: pipe connects lookups, synchronous transforms, and fallbacks. None skips later value-side operations.
     link: ./guide/tutorial/transforming/pipe-basics
-  - icon: 🤝
-    title: byethrow interop
-    details: Convert between Option and Result with toResult and fromResult, built to pair with byethrow.
-    link: ./guide/tutorial/resolving/converting-to-results
-  - icon: 🎯
-    title: Fully type-safe
-    details: Value types are inferred through every step of a pipeline, covered by type tests.
-    link: ./api/modules/Option
+  - title: byethrow conversions
+    details: Use toResult(error) when None needs an error. fromResult turns Failure into None and discards its error.
+    link: ./guide/start/why
+  - title: Two import namespaces
+    details: Import Option or its shorter alias O. Both expose the same constructors, guards, and combinators.
+    link: ./guide/start/quick
 ---

@@ -1,116 +1,101 @@
 ---
-description: "Crossing the boundary to @praha/byethrow: converting an Option to a typed Result with toResult, and back with fromResult, when absence becomes failure."
+description: Convert between byenull Options and byethrow Results with toResult and fromResult, including asynchronous values and error handling.
 ---
 
 # Converting to Results
 
-Sometimes "it's not there" is fine, and sometimes it is an error someone must handle. In this last chapter we will cross that line: we convert our lookup's `Option` into a `Result` from [@praha/byethrow](https://praha-inc.github.io/byethrow/), where the empty case becomes a typed failure.
+An `Option` represents absence without an error. A `Result` from `@praha/byethrow` represents success or failure. Convert between them when the meaning of a missing value changes.
 
 ## Converting an Option to a Result
 
-`toResult` takes the error to use when the Option is a `None`:
+`toResult(error)` supplies the failure value for a `None`. A `Some` becomes a `Success` with the same value:
 
 ```ts
 import { Option } from "byenull";
-import { Result } from "@praha/byethrow";
 
 type User = { id: string; name: string };
 
-const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
+const present: Option.Option<User> = Option.some({ id: "u1", name: "Alice" });
+const missing: Option.Option<User> = Option.none();
 
-const users: User[] = [{ id: "u1", name: "Alice" }];
-
-const result = Option.pipe(findUser("u1", users), Option.toResult(new Error("User not found")));
+const success = Option.pipe(
+  present,
+  Option.toResult(new Error("User not found")),
+);
 // { type: 'Success', value: { id: 'u1', name: 'Alice' } }
 
-const failure = Option.pipe(findUser("u404", users), Option.toResult(new Error("User not found")));
+const failure = Option.pipe(
+  missing,
+  Option.toResult(new Error("User not found")),
+);
 // { type: 'Failure', error: Error('User not found') }
 ```
 
-The `None` carried no information, so we supply the error at the conversion. That is the moment our code decides that this absence is a failure.
+The Option does not contain an error, so the caller must provide one at the conversion point.
 
-## Our project: reporting a missing profile
+## Continuing with Result combinators
 
-Let's finish the project by making the missing _user_ a reported error, while a missing _profile_ stays a mere absence with a name fallback. We convert first, then continue in byethrow's own `pipe`:
+Once absence becomes a failure, continue with byethrow's combinators. A missing user skips the following `Result.map`:
 
 ```ts
 import { Option } from "byenull";
 import { Result } from "@praha/byethrow";
 
 type User = { id: string; name: string };
-type Profile = { userId: string; displayName?: string };
 
-const users: User[] = [
-  { id: "u1", name: "Alice" },
-  { id: "u2", name: "Bob" },
-];
-const profiles: Profile[] = [{ userId: "u1", displayName: "Alice A." }];
-
-const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
-const findProfile = Option.fn((userId: string, profiles: Profile[]) =>
-  profiles.find((profile) => profile.userId === userId),
-);
+const users: User[] = [{ id: "u1", name: "Alice" }];
+const findUser = Option.fn((id: string) => users.find((user) => user.id === id));
 
 const displayName = (id: string) =>
   Result.pipe(
-    // Convert at the boundary: absence becomes a typed failure.
-    Option.toResult(new Error(`User not found: ${id}`))(findUser(id, users)),
-    Result.andThen((user) =>
-      // The profile lookup stays in the world of Options.
-      Option.pipe(
-        findProfile(user.id, profiles),
-        Option.andThen((profile) => Option.some(profile.displayName)),
-        Option.orElse(() => Option.some(user.name)),
-        Option.toResult(new Error(`Profile broken: ${user.id}`)),
-      ),
+    Option.pipe(
+      findUser(id),
+      Option.toResult(new Error(`User not found: ${id}`)),
     ),
+    Result.map((user) => user.name),
   );
 
-displayName("u1"); // { type: 'Success', value: 'Alice A.' }
-displayName("u2"); // { type: 'Success', value: 'Bob' }, profile absence stayed an Option
+displayName("u1"); // { type: 'Success', value: 'Alice' }
 displayName("u404"); // { type: 'Failure', error: Error('User not found: u404') }
 ```
 
-The lookup starts as an Option, converts to a `Result` at the point where absence becomes failure, and then continues with byethrow's `andThen`. The two libraries compose naturally.
-
 ## Converting a Result to an Option
 
-The other direction is `fromResult`: a `Success` becomes a `Some`, and any `Failure` becomes a `None`, and the error is discarded:
+`fromResult` converts a `Success` to a `Some` and a `Failure` to a `None`. It discards the Failure error:
 
 ```ts
 import { Option } from "byenull";
 import { Result } from "@praha/byethrow";
 
-type User = { id: string; name: string };
-declare const result: Result.Result<User, Error>;
-
-const option = Option.fromResult(result);
-// Some<User>, or None when the Result failed
-```
-
-Because the error is lost, we convert Result→Option only when we truly don't care why it failed, for example after recovering the error on the Result side first.
-
-## Async conversions
-
-Both functions handle asynchronous values the same way. The result is a `ResultAsync` or an `OptionAsync`:
-
-```ts
-import { Option } from "byenull";
-import { Result } from "@praha/byethrow";
-
-const result = await Option.toResult("No value")(Promise.resolve(Option.some(2)));
-// { type: 'Success', value: 2 }
-
-const option = await Option.fromResult(Promise.resolve(Result.succeed(2)));
+const some = Option.fromResult(Result.succeed(2));
 // { type: 'Some', value: 2 }
+
+const none = Option.fromResult(Result.fail(new Error("Request failed")));
+// { type: 'None' }, the error is discarded
 ```
 
-## Where the tutorial ends
+Use this direction only when the caller no longer needs the failure details.
 
-We built a profile lookup that starts with a nullable `find`, handles every absence, and ends either as a guaranteed value or as a typed failure, with the two libraries sharing one workflow.
+## Converting asynchronous values
 
-From here:
+Both converters accept Promise-based inputs. `toResult` returns a `ResultAsync` for an `OptionAsync`, and `fromResult` returns an `OptionAsync` for a `ResultAsync`:
 
-- [How-to guides](../../how-to/importing-option): recipes for real-world tasks
-- [Explanation](../../explanation/option-vs-result): the reasoning behind the Option/Result split
-- [API Reference](/api/modules/Option): every function and type, generated from the source
+```ts
+import { Option } from "byenull";
+import { Result } from "@praha/byethrow";
+
+const empty: Option.Option<number> = Option.none();
+
+const result = await Option.pipe(
+  Promise.resolve(empty),
+  Option.toResult("No value"),
+);
+// { type: 'Failure', error: 'No value' }
+
+const option = await Option.fromResult(
+  Promise.resolve(Result.fail("No value")),
+);
+// { type: 'None' }
+```
+
+Convert where absence changes meaning. [Option vs Result](../../explanation/option-vs-result) explains how to choose the type, and [How to convert between Option and Result](../../how-to/converting-between-option-and-result) collects boundary patterns.

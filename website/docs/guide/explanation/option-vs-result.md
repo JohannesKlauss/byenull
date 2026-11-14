@@ -1,41 +1,89 @@
 ---
-description: "Absence versus failure: why byenull and byethrow are separate libraries, when an Option is the right model and when a Result is, and how the two convert at boundaries."
+description: "How to choose between absence without a reason, anticipated failures with typed errors, and unexpected exceptions, plus where to convert between Option and Result."
 ---
 
 # Option vs Result
 
-byenull and [@praha/byethrow](https://praha-inc.github.io/byethrow/) cover two different meanings of "you didn't get a value". Why two libraries, and which one belongs where?
+byenull and [@praha/byethrow](https://praha-inc.github.io/byethrow/) represent different outcomes. An `Option` records whether a value exists. A `Result` records either a value or an error. Choose between them by deciding what the caller needs to know and how it can respond.
 
-## Absence versus failure
+## Use Option when absence needs no explanation
 
-An **Option** models _absence_: the value you asked for may not be there, and that is not an error. `find` not finding a user, a `Map` not containing a key, a DOM query matching nothing: these are ordinary outcomes of asking a question whose answer can legitimately be "no".
+A lookup can legitimately return nothing without providing an error:
 
-A **Result** models _failure_: the operation tried to produce a value and could not. The failure carries information, such as an error object, a message, or a cause, that someone is expected to handle or report.
+```ts
+import { Option } from "byenull";
 
-The distinction is semantic, not mechanical. The same lookup can be either, depending on your domain: "user not found" is absence in a search box and failure in an authentication flow. Choosing the type forces the question, which is the point.
+type User = { id: string; name: string };
+declare const users: readonly User[];
 
-## What each type knows
+const findUser = (id: string): Option.Option<User> =>
+  Option.some(users.find((user) => user.id === id));
+```
 
-An `Option` is `{ type: 'Some', value } | { type: 'None' }`, two variants, one of which carries the value. That minimalism is its strength: it is tiny, serializable, and says exactly one thing.
+A search screen might display the same empty state for every missing user. `None` is enough for that decision. It has no message, cause, or error type, so it does not explain why the lookup returned nothing.
 
-A `Result` is `{ type: 'Success', value } | { type: 'Failure', error }`, and the failure variant carries the error. That extra channel is what lets byethrow build error-heavy workflows: typed error unions, recovery with `orElse`, aggregation of multiple failures.
+Absence is not inherently separate from failure. The domain determines which model fits. A missing user can be an ordinary search result in one function and a failed authentication requirement in another.
 
-Because `None` carries nothing, converting an Option to a Result requires you to _supply_ the error (`toResult(err)`), and converting a Result to an Option _discards_ it (`fromResult`). The conversions are lossy by design. They are the places where your code decides that a failure is really just absence, or that an absence deserves to be treated as a failure. That decision is yours, not the library's.
+## Use Result for anticipated failures with useful errors
 
-## Why two libraries
+A `Failure` carries an error. Its type can tell the caller which anticipated failures need handling:
 
-The two types share almost nothing at runtime: an Option has no error to inspect, a Result has no "just checking" use case. Folding them into one library would either bloat the Option API with error machinery it cannot use, or starve the Result API of the error tools it needs. Keeping them separate keeps both small, and lets you depend on only the half you need.
+```ts
+import { Result } from "@praha/byethrow";
 
-They do share a _shape_. byenull mirrors byethrow's API design deliberately: the same namespace style, the same curried data-last functions, the same `pipe`, the same sync/async unification. Switching between them, or using them side by side, feels like one toolkit. `toResult` and `fromResult` are the bridges.
+class InvalidUserIdError extends Error {}
 
-## When to reach for which
+const parseUserId = (input: string): Result.Result<string, InvalidUserIdError> => {
+  if (!input.startsWith("u_")) {
+    return Result.fail(new InvalidUserIdError("A user ID must start with u_"));
+  }
 
-Use an **Option** when "not there" is a valid answer and nobody needs to know why: lookups, caches, optional settings, nullable fields from APIs, presence checks before acting.
+  return Result.succeed(input);
+};
+```
 
-Use a **Result** when the absence is a failure someone must handle: parsing and validation, I/O, operations whose errors feed user-facing messages, logging, or retries.
+This is useful when the caller can show a validation message, return a specific HTTP response, retry a defined operation, or combine several typed errors. The error stays available for those decisions.
 
-When a flow starts as a lookup but escalates, with "config key missing" becoming "cannot start the server", do the lookup with an Option and convert to a Result at the point where it becomes an error. Convert where the meaning changes, not everywhere.
+Expected file, network, and parsing failures can fit this model. An operation does not need a `Result` merely because it performs I/O or uses code that can throw. The caller's response is the deciding factor.
 
-## Prior art
+## Let unexpected failures throw or reject
 
-The split is a long-standing functional-programming convention: Rust has both `Option` and `Result`, Scala has `Option` and `Try`, and fp-ts has `Option` and `Either`. Libraries that use a single type for both exist, but they tend to overload one variant, usually the "none", with error data it was never meant to hold, which is exactly the ambiguity the two-type split exists to avoid.
+Some failures indicate a bug or a problem that only top-level infrastructure can report. Examples include reading a property from an incorrectly initialized object or losing a required database connection. If the caller cannot respond differently to these failures, adding them to a broad `Result<T, Error>` return type creates handling code without giving the caller a useful choice.
+
+Let those failures throw or reject, then report them at the application boundary. This follows the same division used in [byethrow's error-handling guidance](https://praha-inc.github.io/byethrow/guide/best-practices/result-vs-throw): anticipated failures that callers handle belong in `Result`, while unexpected failures can remain exceptions.
+
+Be careful when wrapping asynchronous work with `Option.fn` or `Option.maybe`. They convert every Promise rejection to `None` and discard the error. Use them only when that loss is acceptable.
+
+## Convert where the caller's needs change
+
+`toResult(error)` turns `Some` into `Success` and `None` into `Failure` with the supplied error. Since `None` contains no information, the call site must provide an error that fits its context.
+
+`fromResult` turns `Success` into `Some` and every `Failure` into `None`. It discards the error:
+
+```ts
+import { Option } from "byenull";
+import { Result } from "@praha/byethrow";
+
+type Config = { host: string };
+
+declare const optionalConfig: Option.Option<Config>;
+declare const loadedConfig: Result.Result<Config, Error>;
+
+const requiredConfig = Option.pipe(
+  optionalConfig,
+  Option.toResult(new Error("The application requires a config")),
+);
+
+const cachedConfig: Option.Option<Config> = Option.fromResult(loadedConfig);
+// A Failure's Error is no longer available in cachedConfig
+```
+
+Handle or log a `Failure` before `fromResult` if its error still matters. Both converters handle asynchronous inputs. Await their results when the input is asynchronous.
+
+Keep conversions near the decision that changes the return type. An optional cache lookup can remain an `Option`. If startup cannot continue without that value, convert once to a `Result` with a startup-specific error. Converting every lookup before that point forces absence-only code to handle errors it does not need.
+
+## The libraries share conventions, not error behavior
+
+byethrow includes operations for typed error recovery and aggregation that do not apply to `None`. Keeping those operations in byethrow avoids duplicating them in an Option API that has no error data to process.
+
+The libraries use similar namespace names, data-last combinators, `pipe`, and Promise-aware functions. Their shared conventions make conversion code easier to read, but they do not make the types interchangeable. Use `Option` while all missing values receive the same handling. Switch to `Result` when the error itself must drive the next decision.

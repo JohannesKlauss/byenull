@@ -1,51 +1,33 @@
 ---
-description: Why use an Option type instead of nullish checks, and why byenull in particular. Type-safe absence handling with a byethrow-compatible API and no functional programming overhead.
+description: Decide when Option pipelines are useful, what byenull leaves explicit, and when a @praha/byethrow Result is the better return type.
 ---
 
 # Why byenull?
 
-This page explains the problems an `Option` type solves, and why byenull in particular is a good fit for everyday TypeScript projects.
+TypeScript's `strictNullChecks` already prevents direct property access on a nullable value. Keep using `?.` and `??` for a local property or a single default. They are direct and need no wrapper.
 
-## The problem with nullish values
+byenull helps when absence passes through several operations. A lookup can return `Option<T>`, after which `map` and `andThen` run their callbacks only for Some. None reaches the end without invoking later value-side work. The return type preserves the possibility of absence throughout the pipeline.
 
-`null` and `undefined` are the "billion-dollar mistake" JavaScript inherited. TypeScript's `strictNullChecks` catches many mistakes at compile time, but three problems remain:
+## Keep the decision at the boundary
 
-- **Repeated checking.** A nullable value carries its ambiguity everywhere. Every consumer re-checks, and every `?.` and `??` is one more chance to forget or to treat different kinds of "missing" identically.
-- **Unexplained absence.** `null` says nothing about _why_ the value is missing, whether it was not loaded, not found, or not applicable. Downstream code either guesses or ignores the difference.
-- **Poor composition.** Chains of nullable lookups degenerate into nested conditionals or long `?.` trains that silently produce `undefined` somewhere deep.
+An Option pipeline still needs an exit. Use `Option.isSome` or `Option.isNone` when the two cases need different behavior. Use `Option.unwrap(defaultValue)` when a default is enough. `unwrap` returns the Some value or the default, and never throws for None.
 
-An `Option` type solves these by treating absence as an ordinary value:
+This moves repeated intermediate nullish handling into combinators. It does not remove the need for every null check. Input validation, API boundaries, and code that keeps raw nullable values still need appropriate checks.
 
-- **Checked once.** The lookup returns `Some` or `None`, and the type carries which one you have.
-- **Composable.** `map`, `andThen`, and `orElse` work on the whole Option, so absence short-circuits through the pipeline instead of being re-tested at every step.
-- **Serializable and debuggable.** An Option is a plain object, so you can log it, diff it, assert on it.
+## Know what None leaves out
 
-See [Option vs null and undefined](../explanation/option-vs-null) for a deeper treatment.
+None has no error or explanation. byenull also normalizes `null` and `undefined` to the same value, so it cannot preserve a distinction between them. Keep a nullable value or define a more specific union when that distinction matters.
 
-## Why byenull over other libraries?
+`Option.fn` and `Option.maybe` convert Promise rejection to None. This discards the rejection reason. They do not catch a synchronous throw, which continues to propagate. Use a Result when callers need either kind of failure information.
 
-There are several excellent Option and functional libraries in the TypeScript ecosystem. byenull aims for the sweet spot between a minimal utility and a full functional programming framework.
+These trade-offs make Option a poor substitute for general error handling. They also keep its data shape small: Some contains a `value`, while None contains only its `type`. Both are plain objects that can be logged, compared, and serialized.
 
-### Compared to plain nullish handling
+## Pair absence with failure
 
-Everything byenull does is _possible_ with `?.`, `??`, and discipline, in the same sense that error handling is possible with `try/catch` and discipline. byenull's value is that the discipline becomes the compiler's job: the pipeline either has a value or it doesn't, and the types say which.
+byenull complements `@praha/byethrow`; it is not another Result library. Return an Option when "not found" or "not set" needs no error. Return a Result when parsing fails, a request returns an error that the caller must inspect, or a business rule needs a typed reason.
 
-### Compared to Effect and fp-ts
+At a boundary between those models, `Option.toResult(error)` supplies the Failure error for None. `Option.fromResult` maps Failure to None and discards its error; this may lose useful information and should be a deliberate decision.
 
-Effect and fp-ts provide `Option` types inside a larger functional runtime, together with a big vocabulary of concepts. byenull only deals with presence and absence: plain objects, standalone functions, no runtime to adopt, no paradigm to learn.
+Both libraries use namespaces and familiar operation names such as `map`, `andThen`, `orElse`, and `unwrap`. You can introduce byenull around one lookup without rewriting unrelated code that uses nullish values or Results.
 
-### Compared to byethrow
-
-byethrow itself is the natural first choice when your problem is _failure_, operations that error with information you must handle. byenull does not replace it. It covers the other half: values that are simply _not there_. The two libraries share an API design, so using both feels like one toolkit, and `toResult` / `fromResult` convert between them at the boundary.
-
-## Designed for real-world use
-
-- **Team-friendly.** Adopt it one lookup at a time. It works alongside existing code that returns `null`.
-- **TypeScript-first.** Value types are inferred through every step of a pipeline.
-- **Lightweight.** A small runtime with full tree-shaking support.
-- **Predictable.** The naming scheme matches byethrow, so `map`, `andThen`, `orElse`, and `unwrap` are easy to remember.
-- **Well-equipped.** [Test matchers](../how-to/testing-options) and [generated API documentation](/api/modules/Option) round out the workflow.
-
-## Next steps
-
-- [Quick start](./quick): install byenull and run the core workflow.
+The [quick start](./quick.md) shows where to construct, transform, guard, and convert Options.

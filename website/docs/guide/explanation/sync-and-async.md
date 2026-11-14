@@ -1,36 +1,96 @@
 ---
-description: "How byenull unifies synchronous and asynchronous Options: OptionMaybeAsync, the isPromise dispatch, and the OptionFor/HasPromise type machinery behind it."
+description: "How Promise-aware Option operations dispatch at runtime, how OptionFor types mixed unions, and why unwrap can return either a value or a Promise."
 ---
 
-# The sync/async model
+# Sync and async Options
 
-Most Option libraries have two of everything: `map` for Options, `mapAsync` for Promises of Options. byenull has one of everything. Why does that work, and what is going on underneath?
+An `OptionAsync<T>` is a `Promise<Option<T>>`. An `OptionMaybeAsync<T>` is the union `Option<T> | Promise<Option<T>>`. byenull's Promise-aware functions share names across these forms, so you do not need separate `map` and `mapAsync` functions.
 
-## One type, one API
+The shared names do not erase the differences in their return types. Conditional types can also make a function's static result more conservative than the value produced by one particular call.
 
-Every transformer accepts an `OptionMaybeAsync<T>`, either an `Option<T>` or a `Promise<Option<T>>`, and returns whichever of the two the input turns out to be. At runtime the choice is a single check: the internal `isPromise` helper tests whether the value has `then`/`catch`, applies the transformation directly if not, and otherwise attaches it with `.then`:
+## Promise handling is limited to specific operations
+
+`map`, `andThen`, `orElse`, `unwrap`, `toResult`, and `fromResult` handle Promise-based inputs. At runtime, each checks the immediate input. A plain Option or Result is processed immediately. A Promise input is chained with `.then`, and the result is a Promise.
+
+The constructors and guards do not generally resolve Promises. For example, `some(promise)` creates an Option containing the Promise as its payload. `isSome` and `isNone` inspect only the immediate Option passed to them. `fn` and `maybe` have their own Promise handling for callback results, including rejection conversion, as described in [Design principles](./design-principles#synchronous-throws-and-promise-rejections-differ).
+
+## Use map for synchronous transformations
+
+The callback passed to `map` transforms a value synchronously. If the input is a Promise of an Option, `map` waits for that input through its own Promise handling before invoking the synchronous callback.
+
+Use `andThen` when the next step returns an Option or a Promise of an Option. This includes asynchronous work wrapped with `fn`:
 
 ```ts
-// @noErrors
-// The shape of every transformer in byenull (simplified):
-const apply = (o: Option<T>) => (isNone(o) ? o : fn(o.value));
-return isPromise(option) ? option.then(apply) : apply(option);
+import { Option } from "byenull";
+
+declare function loadDisplayName(id: string): Promise<string | null>;
+const displayNameFor = Option.fn(loadDisplayName);
+
+const pending = Option.pipe(
+  Option.some("u1"),
+  Option.andThen(displayNameFor),
+  Option.map((name) => name.trim()),
+);
+
+const displayName: Option.Option<string> = await pending;
 ```
 
-There is no separate async API to learn, and no way for the two halves to drift apart. An `andThen` step that is synchronous today stays valid the day its inner function becomes asynchronous. The surrounding pipeline does not change; only its result widens to an `OptionAsync`.
+`displayNameFor` returns an `OptionAsync<string>`. `andThen` uses that Option as the next pipeline value. The later `map` callback still receives a resolved `string` and runs only for `Some`.
 
-## How the types keep up
+Do not use an async Option-returning callback as a `map` mapper. `map` does not flatten that callback's result into the next Option. `andThen` is the operation for that job.
 
-The runtime dispatch needs a type-level mirror, or every transformer would have to return a loose union. That mirror is `OptionFor<O, T>`: it resolves to `Option<T>` when the input type `O` contains no Promise, and `OptionAsync<T>` when it does. The Promise detection itself is `HasPromise<T>`, a conditional that asks whether `Promise<any>` would be assignable to `T`. It is true for `Promise<Option<string>>` and for any union that includes a Promise, and false for plain Options.
+## OptionFor gives a Promise-containing union an async result
 
-Chained steps union their input types, `OptionFor<O1 | ReturnType<F>, ...>`, so one asynchronous step anywhere in a chain makes the final type asynchronous. This is why the rule of thumb in the guides is "await the result once at the end": the type system already tracks whether you need to.
+Combinators such as `map`, `andThen`, and `orElse` use `OptionFor<O, T>` to select their return type. If `O` contains no Promise, the result is `Option<T>`. If any member of `O` contains a Promise type, the result is `OptionAsync<T>`, which is Promise-only:
 
-## What it costs
+```ts
+import { Option } from "byenull";
 
-The price is visible in the signature of every curried function: generic types like `OptionFor<O1 | ReturnType<F>, InferSome<F>>` are harder to read in an editor tooltip than a plain `Option<T>` would be. That is the trade: a slightly heavier type surface in exchange for never writing or maintaining parallel sync/async functions.
+type SyncResult = Option.OptionFor<Option.Option<number>, string>;
+// Option.Option<string>
 
-The unification also means synchronicity is decided by the data, not by which function you called. If a value's type is `OptionMaybeAsync<T>`, sometimes resolved and sometimes a Promise, a transformer applied to it returns `Option<T> | Promise<Option<T>>`, and only an `await`, or knowledge of the specific value, collapses it. That is honest: the ambiguity was in the value all along.
+type AsyncResult = Option.OptionFor<Option.OptionAsync<number>, string>;
+// Option.OptionAsync<string>
 
-## Why not a separate async Option type
+type MixedResult = Option.OptionFor<Option.OptionMaybeAsync<number>, string>;
+// Option.OptionAsync<string>, not Option.Option<string> | Option.OptionAsync<string>
+```
 
-Some libraries make the async case a distinct type with its own combinators. That buys precise signatures, but it splits every pipeline, tutorial, and test into sync and async variants, and it forces `await`-style adapters at every seam between them. byenull's bet, the same bet byethrow makes with `ResultMaybeAsync`, is that one API with Promise-aware types is less total complexity than two APIs with clean ones.
+`andThen` and `orElse` include both the incoming Option type and the callback's return type in this decision. One possible asynchronous branch therefore makes the static result asynchronous.
+
+For a mixed-union value, this type rule is conservative. Runtime dispatch still examines the actual value:
+
+```ts
+import { Option } from "byenull";
+
+declare const mixed: Option.OptionMaybeAsync<number>;
+
+const mapped: Option.OptionAsync<number> = Option.map((value: number) => value + 1)(mixed);
+```
+
+If `mixed` contains a plain `Some(1)` at runtime, this call can return a plain `Some(2)` immediately. Its declared type is still `Promise<Option<number>>` because the input type also permits a Promise. Follow the static type at call sites. An `await` inside an async function normalizes either runtime outcome to an `Option<number>`.
+
+## unwrap distributes over a mixed union
+
+`unwrap` has a different return-type rule. Its conditional type distributes over the input union instead of collapsing every Promise-containing union to Promise-only.
+
+For a numeric Option and a numeric fallback, a synchronous input returns `number`, an asynchronous input returns `Promise<number>`, and a mixed input returns `number | Promise<number>`:
+
+```ts
+import { Option } from "byenull";
+
+declare const mixed: Option.OptionMaybeAsync<number>;
+
+const value: number | Promise<number> = Option.unwrap(0)(mixed);
+const settledValue: number = await value;
+```
+
+The runtime behavior matches both members of that return type. A plain Option produces the value or fallback immediately. A Promise input produces a Promise for the value or fallback.
+
+## The shared API has visible type costs
+
+A separate set of async combinators could give each function a shorter signature. byenull instead uses conditional types such as `OptionFor`, which are harder to read in editor tooltips and error messages. Mixed-union inputs need particular care because `OptionFor` can declare a Promise even when one call returns synchronously.
+
+Changing an `andThen` callback from an `Option` to an `OptionAsync` also changes the inferred result of later combinators. Existing pipeline steps can remain unchanged, but callers must await the eventual result when they need a resolved Option.
+
+Use `map` only for synchronous value transformations. Use `andThen` or `orElse` for Option-returning work that may be asynchronous. Await at the point where your code needs one resolved type, especially when the input is `OptionMaybeAsync` rather than definitely synchronous or definitely asynchronous.

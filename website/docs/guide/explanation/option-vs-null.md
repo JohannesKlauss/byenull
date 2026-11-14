@@ -1,70 +1,88 @@
 ---
-description: Why an Option beats repeated null checks and optional-chaining chains, where it pays off, and when plain nullish handling is fine.
+description: "When an Option helps compose dependent operations, when nullish values are clearer, and what information both representations leave out."
 ---
 
 # Option vs null and undefined
 
-Why wrap a nullable value in an `Option` at all, when `strictNullChecks` already forces you to handle `null` and `undefined`? The short answer: the compiler checks each _lookup_ once, but your _code_ still repeats the checking, and repeating checks is where bugs live.
+TypeScript's `strictNullChecks` already requires you to handle nullable values. An `Option` does not remove that obligation. It gives presence and absence a common set of combinators, which helps when several operations depend on the same value.
 
-## The problem with nullish checks
+For an immediate local decision, a nullish value is often simpler. Neither representation explains why a value is missing. `None` deliberately carries no reason.
 
-A nullable value carries its ambiguity everywhere it goes. Every consumer has to re-check, and every layer of access adds another chance to forget:
+## Use nullish values for local decisions
+
+Optional chaining handles a short lookup without extra imports or wrappers:
 
 ```ts
-// @noErrors
-type User = { id: string; profile?: { email?: string } };
+type User = { profile?: { displayName?: string } };
 declare const user: User | null;
 
-// The check is repeated at every layer, and each layer can go wrong:
-const email = user?.profile?.email ?? "unknown";
-const domain = email.split("@")[1] ?? "unknown";
+const displayName = user?.profile?.displayName ?? "Anonymous";
+// displayName is a string
 ```
 
-Optional chaining and nullish coalescing are readable, but they say nothing about _why_ a value is missing. `??` treats "not loaded", "not found", and "not applicable" identically, and a long `?.` chain silently produces `undefined` at any point. The failure moves to wherever the `undefined` finally explodes.
+This code has one fallback close to the data it uses. Wrapping `user` and the nested fields in Options would add work without changing the result.
 
-With `Option`, the ambiguity is resolved once, at the source, and the rest of the code works on a value that simply _is_:
+Plain nullish values also preserve the difference between `null` and `undefined`. The `some`, `fn`, and `maybe` creators collapse both into `None`. That is helpful when both mean "no value", but harmful when a protocol assigns them different meanings. For example, a patch format can use `undefined` to leave a field unchanged and `null` to clear it. Do not normalize that distinction away.
+
+## Use Options for dependent operations
+
+Consider three lookups where each step needs the previous value. Both versions below are type-safe. They differ in where they handle absence:
 
 ```ts
 import { Option } from "byenull";
 
-type User = { id: string; email: string };
-const users: User[] = [{ id: "u1", email: "alice@example.com" }];
+type User = { id: string };
+type Profile = { userId: string };
 
-const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
-
-const domain = Option.pipe(
-  Option.some("u1"),
-  Option.andThen((id) => findUser(id, users)),
-  Option.map((user) => user.email.split("@")[1]),
-  Option.unwrap("unknown"),
-);
-```
-
-## Presence as a type
-
-An `Option<T>` is the union `Some<T> | None`. The two variants are distinguished by a plain `type` property, so the compiler, not a convention, enforces that you check before you access `value`. Once you have checked with `isSome`, narrowing makes `value` available without a cast.
-
-This is the same move TypeScript's own `strictNullChecks` makes with `T | null`. The difference is composability: an `Option` can be passed to `map`, `andThen`, and `orElse` as a unit, while a nullable has to be re-examined at every step. Options compose; null checks accumulate.
-
-## Why the checks don't compose
-
-Consider a pipeline of lookups where each step can come up empty. With nullish values, the plumbing dominates the logic:
-
-```ts
-// @noErrors
-declare const findUser: (id: string) => User | null;
-declare const findProfile: (user: User) => Profile | null;
-declare const findAvatar: (profile: Profile) => string | null;
+declare function findUser(id: string): User | null;
+declare function findProfile(user: User): Profile | null;
+declare function findAvatar(profile: Profile): string | null;
 
 const user = findUser("u1");
-const profile = user && findProfile(user);
-const avatar = profile && findAvatar(profile);
+const profile = user === null ? null : findProfile(user);
+const nullableAvatar = profile === null ? null : findAvatar(profile);
+// nullableAvatar is a string or null
+
+const findUserOption = Option.fn(findUser);
+const findProfileOption = Option.fn(findProfile);
+const findAvatarOption = Option.fn(findAvatar);
+
+const avatar: string = Option.pipe(
+  findUserOption("u1"),
+  Option.andThen(findProfileOption),
+  Option.andThen(findAvatarOption),
+  Option.unwrap("/default-avatar.png"),
+);
+// A missing value at any step selects the default avatar
 ```
 
-With Options, absence short-circuits through the same pipeline the happy path uses. The steps that need a value simply don't run when there isn't one.
+The nullable version states each check next to the call it guards. The Option version runs `andThen` callbacks only for `Some` and handles every `None` at `unwrap`. A fourth dependent lookup adds one `andThen` step, rather than another variable and null check.
 
-## When not to use an Option
+There is a real setup cost here. The Option version wraps three existing functions. If nothing else uses those wrappers, the nullable version may be the better choice. The wrappers become more useful when several callers share the same lookups or when the pipeline continues with recovery and transformation steps.
 
-An `Option` earns its keep at boundaries where absence is a real, meaningful outcome: lookups, queries, configuration, parsed data. For values that are obviously present, like a constant, a freshly constructed object, or a parameter you just validated, wrapping them adds noise. `some()` is a conversion of ambiguity into structure; it cannot create ambiguity that isn't there, and there is no point pretending it can.
+## Narrowing works with both representations
 
-Similarly, if a function's nullish result is immediately consumed in the next line, a plain check is often clearer. Options start to pay off the moment the nullable value crosses a function boundary or feeds into further steps.
+With `strictNullChecks`, TypeScript narrows `T | null` after a null check. With an `Option<T>`, `isSome` narrows `Some<T> | None` and exposes `value`:
+
+```ts
+import { Option } from "byenull";
+
+declare const option: Option.Option<string>;
+
+if (Option.isSome(option)) {
+  const uppercased: string = option.value.toUpperCase();
+  console.log(uppercased);
+}
+```
+
+The compiler enforces access in both cases. Option's added value is the ability to pass the whole union through `map`, `andThen`, and `orElse`, not a stronger narrowing rule.
+
+The nullish normalization performed by constructors also has limits. `Some<T>` does not exclude nullish types for hand-built objects, and `isOption` only checks the object's structure. See [Design principles](./design-principles#constructors-normalize-nullish-values) before accepting Option-shaped data from an external source.
+
+## Keep the reason when callers need it
+
+A nullish result and `None` can both represent "not loaded", "not found", or "not applicable". Neither records which outcome occurred. If those outcomes need different handling, use a richer return type or a `Result` with a typed error.
+
+`fn` and `maybe` also discard the reason for a Promise rejection. That is appropriate only when every rejection can share the same empty-case handling.
+
+Return an `Option` when callers will compose operations and treat every empty case alike. Return a nullable value when the caller will check it immediately or needs to distinguish `null` from `undefined`. If a value has already been validated, wrapping it only to unwrap it in the next statement adds no useful check.

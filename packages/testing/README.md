@@ -1,9 +1,9 @@
-# byenull-testing 👋
+# byenull-testing
 
 [![npm version](https://badge.fury.io/js/byenull-testing.svg)](https://www.npmjs.com/package/byenull-testing)
 [![license](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/JohannesKlauss/byenull/blob/main/LICENSE)
 
-Custom test matchers for asserting [byenull](https://github.com/JohannesKlauss/byenull) Options in Vitest and Jest.
+Custom test matchers for asserting [byenull](https://github.com/JohannesKlauss/byenull) Option values in Vitest and Jest.
 
 ## Installation
 
@@ -41,12 +41,17 @@ export default defineConfig({
 ## Usage
 
 ```ts
-import { O } from "byenull";
+import { Option } from "byenull";
 import { expect, test } from "vitest";
+
+type User = { id: string; name: string };
+
+const users: User[] = [{ id: "u1", name: "Alice" }];
+const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
 
 test("finds the user", () => {
   expect(findUser("u1", users)).toBeSome((user) => {
-    expect(user.name).toBe("Alice"); // user is typed as the Some value
+    expect(user.name).toBe("Alice"); // user is typed as User
   });
 });
 
@@ -57,8 +62,8 @@ test("finds no user", () => {
 
 ## Documentation
 
-See [Testing Options](https://github.com/JohannesKlauss/byenull/tree/main/website/docs/guide/how-to/testing-options.md) in the byenull documentation for full setup instructions for Vitest and Jest.
+See [Testing options](https://github.com/JohannesKlauss/byenull/blob/main/website/docs/guide/how-to/testing-options.md) in the byenull documentation for full setup instructions for Vitest and Jest.
 
 ## License
 
-This project is [MIT](https://github.com/JohannesKlauss/byenull/blob/main/LICENSE) licensed.
+This project is licensed under the [MIT license](https://github.com/JohannesKlauss/byenull/blob/main/LICENSE).

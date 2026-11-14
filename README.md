@@ -6,19 +6,21 @@
 
 ## Introduction
 
-`byenull` is a lightweight, tree-shakable Option type package with a simple, consistent API designed to handle nullable operations in JavaScript and TypeScript. It provides a straightforward way to manage null and undefined without the complexity of larger libraries.
+`byenull` provides an Option type for JavaScript and TypeScript. It represents a value as `Some` or `None` and includes functions for creating, transforming, and checking Option values.
 
-It is designed to act as a companion library for the excellent [@praha-inc/byethrow](https://github.com/praha-inc/byethrow) library. It closely follows its API design and provides helper functions to transform Option types into Result types and vice versa.
+It complements [@praha-inc/byethrow](https://github.com/praha-inc/byethrow), follows its API design, and includes helpers for converting between Option and Result types. You can use `byenull` with `byethrow` or on its own.
 
-Although it is recommended to use `byethrow` and `byenull` side by side, you can certainly use `byenull` standalone.
-
-## Quick Example
+## Quick example
 
 ```ts
 import { Option } from "byenull";
 
 type User = { id: string; name: string };
 type Article = { title: string; author: User };
+
+const alice: User = { id: "u123", name: "Alice" };
+const users: User[] = [alice];
+const articles: Article[] = [{ title: "Working with Option", author: alice }];
 
 const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
 
@@ -40,11 +42,11 @@ if (Option.isSome(article)) {
 
 ## Structure
 
-| Package                               | Version                                                                                                       | Description           |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------- | --------------------- |
-| [`byenull`](packages/byenull)         | [![npm version](https://badge.fury.io/js/byenull.svg)](https://www.npmjs.com/package/byenull)                 | Core package          |
-| [`byenull-testing`](packages/testing) | [![npm version](https://badge.fury.io/js/byenull-testing.svg)](https://www.npmjs.com/package/byenull-testing) | Testing matchers      |
-| [`byenull-website`](website)          | —                                                                                                             | Documentation website |
+| Package | Version | Description |
+| --- | --- | --- |
+| [`byenull`](packages/byenull) | [![npm version](https://badge.fury.io/js/byenull.svg)](https://www.npmjs.com/package/byenull) | Core package |
+| [`byenull-testing`](packages/testing) | [![npm version](https://badge.fury.io/js/byenull-testing.svg)](https://www.npmjs.com/package/byenull-testing) | Testing matchers |
+| [`byenull-website`](website) | Private | Documentation website |
 
 ## Documentation
 
@@ -56,18 +58,16 @@ pnpm --filter byenull --filter byenull-testing build
 pnpm --dir website dev
 ```
 
-- **[Getting Started](website/docs/guide/start/introduction.md)** — what byenull is and how to run its core workflow in minutes
-- **[Tutorial](website/docs/guide/tutorial/index.mdx)** — a step-by-step lesson that builds a profile lookup with every function
-- **[How-To Guides](website/docs/guide/how-to/index.mdx)** — recipes for real-world tasks: nullish sources, async pipelines, byethrow interop, testing
-- **[Explanation](website/docs/guide/explanation/index.mdx)** — the reasoning behind the Option type, the sync/async model, and the library's design
-- **[API Reference](website/docs/api)** — generated from the source with typedoc on every website build
+- [Getting started](website/docs/guide/start/introduction.md) explains what byenull is and how to use its core workflow.
+- The [tutorial](website/docs/guide/tutorial/basics/option-type.md) builds a profile lookup with the core functions.
+- [How-to guides](website/docs/guide/how-to/importing-option.md) cover nullish sources, async pipelines, byethrow interoperability, and testing.
+- [Explanation](website/docs/guide/explanation/option-vs-null.md) discusses the Option type, sync and async pipelines, and design decisions.
+- The [API reference](website/docs/api) is generated from source with TypeDoc on every website build.
 
-## 🤝 Contributing
+## Contributing
 
-Contributions, issues and feature requests are welcome.
+Contributions, issues, and feature requests are welcome. Use the [issues page](https://github.com/JohannesKlauss/byenull/issues) to report a problem or discuss a change.
 
-Feel free to check [issues page](https://github.com/JohannesKlauss/byenull/issues) if you want to contribute.
+## License
 
-## 📝 License
-
-This project is [`MIT`](https://github.com/JohannesKlauss/byenull/blob/main/LICENSE) licensed.
+This project is licensed under the [MIT license](https://github.com/JohannesKlauss/byenull/blob/main/LICENSE).

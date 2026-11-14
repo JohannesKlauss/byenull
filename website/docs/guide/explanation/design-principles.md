@@ -1,31 +1,74 @@
 ---
-description: "The decisions behind byenull's shape: plain objects instead of classes, data-last curried functions composed with pipe, nullish normalization in some, and why fn and maybe do not catch synchronous throws."
+description: "Why byenull uses plain objects, data-last functions, nullish-normalizing constructors, two namespace aliases, and shared sync and async combinators."
 ---
 
 # Design principles
 
-byenull looks the way it does because of a handful of small, deliberate decisions. This page states them and the reasoning behind each, so the trade-offs are visible rather than buried in the source.
+byenull uses plain data and function pipelines. Those choices affect how you compose code, validate values, and handle asynchronous work. They also have costs that are worth understanding before you adopt the API.
 
-## Plain objects, no classes
+## Options are plain objects
 
-An `Option` is a plain object with a `type` property, `{ type: 'Some', value }` or `{ type: 'None' }`, not a class instance. Everything follows from that: an Option can be logged and inspected, compared with `toEqual` in tests, serialized to JSON, and constructed by hand if you ever need to. Nothing is hidden behind private state or prototype methods, and tree-shaking works per-function because the functions do not live on the value. A class-based design would move the API onto instances, which bundlers prune less aggressively and which drags the whole class into every import.
+An `Option` is either `{ type: "Some", value }` or `{ type: "None" }`. It has no class instance, private state, or prototype methods. You can inspect it in a debugger and compare it with ordinary object assertions. `JSON.stringify` can serialize the object when its payload is also serializable.
 
-## Data-last functions, composed with `pipe`
+The cost is that values do not have methods such as `option.map(...)`. You import the functions you need and use type guards or pipelines. This keeps the data independent of the operations performed on it.
 
-Transformers are curried in the data-last order: `map(fn)` returns a function waiting for the Option. The payoff is `pipe`. A pipeline reads top-to-bottom in execution order, which byethrow demonstrated is the most readable way to express a chain. The cost is that a single transformation reads "inside-out" (`Option.map(f)(option)`), so `pipe` is the intended home for these functions and the documentation treats it that way.
+## Constructors normalize nullish values
 
-## `some()` normalizes nullish values
+`some(null)` and `some(undefined)` return `None`. The `fn` and `maybe` creators apply the same rule to nullish callback results. Code that consumes these results does not need a second check for a nullish payload.
 
-`some(null)` and `some(undefined)` return a `None`, and the type signature removes nullish types from the value. This maintains a single invariant: _a `Some` always holds a non-nullish value_. Without it, every consumer of an Option would have to re-check for null inside the `Some`, exactly the checking the Option exists to remove. The normalization is deliberately at the constructor, not spread across every transformer: values enter an Option once, through `some`, `fn`, or `maybe`, and are trustworthy from there on.
+Normalization is a constructor rule. It is not a guarantee about every object with an Option shape. `Some<T>` does not constrain `T`, and `isOption` checks the object's fields without inspecting the payload:
 
-## `fn` and `maybe` catch rejections, not throws
+```ts
+import { Option } from "byenull";
 
-The wrappers convert a nullish _return value_ into a `None`, and on the asynchronous path a rejected Promise into a `None`. A synchronous throw, however, propagates to the caller. The reasoning: a nullish return is a _statement about the value_ ("there isn't one"), which is Option's domain. A synchronous throw is usually a programming error (or a thrown value that a caller upstream wants to catch), and silently converting it to `None` would swallow information. That is the same argument byethrow makes for why `fn` there converts throws into typed Failures rather than discarding them. When an operation genuinely throws in your domain, wrap the throw yourself or model it as a Result.
+const handBuilt: Option.Some<null> = { type: "Some", value: null };
+const recognized: boolean = Option.isOption(handBuilt);
+// recognized is true, even though the value is null
+```
 
-## Two namespaces, one implementation
+Prefer the creators when you want nullish normalization. If an Option-shaped object comes from an untrusted source, validate its `Some.value` separately before treating it as non-nullish.
 
-`Option` and `O` are the same module re-exported twice. They exist because pipelines read either explicit or compact, and different codebases legitimately want different registers, not because the functions differ. Both tree-shake identically, since each namespace member is an independent export.
+## Functions take data last
 
-## A companion, not a clone
+A call such as `Option.map(fn)` returns a function that waits for an Option. This makes the same function usable as a step in `Option.pipe`:
 
-byenull follows @praha/byethrow's API design on purpose: namespaces, curried combinators, `pipe`, the sync/async unification. A developer who knows one library can use the other without learning a new mental model, and the interop functions (`toResult`, `fromResult`) assume both vocabularies. Where the two domains differ, the API diverges rather than pretending the shapes match: an Option has no error channel, so its `unwrap` returns a fallback rather than throwing, and its conversion to Result requires you to supply the error yourself.
+```ts
+import { Option } from "byenull";
+
+const doubled = Option.map((value: number) => value * 2)(Option.some(21));
+
+const domain = Option.pipe(
+  Option.some("alice@example.com"),
+  Option.map((address) => address.slice(address.indexOf("@") + 1)),
+  Option.unwrap("unknown"),
+);
+// domain is a string
+```
+
+A single transformation has an extra call layer, as `doubled` shows. A pipeline lists later steps in execution order, which avoids nesting a call around each preceding result. byenull uses this convention throughout instead of supporting both data-first and data-last variants.
+
+## Synchronous throws and Promise rejections differ
+
+`fn` and `maybe` turn a nullish callback result into `None`. When the callback returns a Promise, they also turn a rejection into `None`. A synchronous throw before the callback returns a Promise propagates to the caller.
+
+A throw inside an `async` function becomes a Promise rejection, so `fn` and `maybe` convert it to `None`. This distinction follows JavaScript's execution rules. It is not based on the kind of error thrown.
+
+Converting a rejection to `None` discards its reason. Use a `Result` when the caller needs the rejection value for logging, recovery, or a user-facing message.
+
+## Promise support belongs to specific operations
+
+`map`, `andThen`, `orElse`, `unwrap`, `toResult`, and `fromResult` handle Promise-based inputs according to their signatures. Their synchronous and asynchronous paths share the same function names. See [Sync and async Options](./sync-and-async) for the runtime and type rules.
+
+The constructors and guards do not generally resolve Promises. Passing a Promise to `some` wraps the Promise as a payload. `none` takes no input, and the guards inspect the immediate value they receive. `fn` and `maybe` are a separate case because they adapt Promises returned by their callbacks.
+
+## The package root exports two namespace aliases
+
+The package root exports the `Option` and `O` namespaces. They expose the same functions and types, with `O` providing a shorter name. There is no behavioral difference between them.
+
+Use `Option` where the full name makes call sites clearer. Use `O` if your project prefers shorter pipelines. Pick one convention per module so readers do not have to switch names without a reason.
+
+## byenull follows byethrow where their behavior overlaps
+
+byenull uses the namespace style, curried data-last functions, `pipe`, and Promise-aware combinators from [@praha/byethrow](https://praha-inc.github.io/byethrow/). Code that uses both libraries can keep the same pipeline structure.
+
+The two types still carry different information. `None` has no error field, while a byethrow `Failure` carries an error. `toResult` therefore requires an error for the empty case, and `fromResult` discards a failure's error. The shared conventions do not hide that difference.

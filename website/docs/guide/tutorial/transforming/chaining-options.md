@@ -1,150 +1,96 @@
 ---
-description: "Chaining steps that can come up empty with andThen: sequencing lookups, mixing synchronous and asynchronous steps, and letting None skip the remaining work."
+description: Chain Option-returning steps with andThen, including sequential lookups, asynchronous work, and None short-circuiting.
 ---
 
-# Chaining Options
+# Chaining options
 
-In this chapter we will chain the lookups of our project into one pipeline with `andThen`. `andThen` is the tool for steps that may come up empty: the callback receives the value of a `Some` and returns the next Option.
+`andThen` runs a step that returns another `Option`. It uses the returned Option directly, so dependent lookups and asynchronous steps can share one pipeline.
 
-## Chaining a second lookup
+## Chaining steps with `andThen`
 
-Our project chains two lookups: find the user, then find their profile.
-`andThen` sequences them, and a `None` anywhere skips everything after it:
+For a `Some`, `andThen` calls the function with the inner value. The function can return either a `Some` or a `None`. If the input is already `None`, the function is not called:
 
 ```ts
 import { Option } from "byenull";
 
-type User = { id: string; name: string };
-type Profile = { userId: string; displayName?: string };
-
-const users: User[] = [
-  { id: "u1", name: "Alice" },
-  { id: "u2", name: "Bob" },
-];
-const profiles: Profile[] = [{ userId: "u1", displayName: "Alice A." }];
-
-const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
-const findProfile = Option.fn((userId: string, profiles: Profile[]) =>
-  profiles.find((profile) => profile.userId === userId),
+const doubled = Option.pipe(
+  Option.some(3),
+  Option.andThen((value) => Option.some(value * 2)),
 );
+// { type: 'Some', value: 6 }
 
-const profile = Option.pipe(
+const rejected = Option.pipe(
+  Option.some(3),
+  Option.andThen(() => Option.none()),
+);
+// { type: 'None' }
+
+const skipped = Option.pipe(
+  Option.none(),
+  Option.andThen((value: number) => Option.some(value * 2)),
+);
+// { type: 'None' }, the callback is not called
+```
+
+Unlike `map`, `andThen` does not nest an Option returned by its callback. The returned Option becomes the input to the next step.
+
+## Chaining sequential lookups
+
+Use `andThen` when a later lookup needs a value from an earlier one. A missing user or team stops the rest of the chain:
+
+```ts
+import { Option } from "byenull";
+
+type User = { id: string; teamId: string };
+type Team = { id: string; name: string };
+
+const users: User[] = [{ id: "u1", teamId: "t1" }];
+const teams: Team[] = [{ id: "t1", name: "Docs" }];
+
+const findUser = Option.fn((id: string) => users.find((user) => user.id === id));
+const findTeam = Option.fn((id: string) => teams.find((team) => team.id === id));
+
+const team = Option.pipe(
   Option.some("u1"),
-  Option.andThen((id) => findUser(id, users)),
-  Option.andThen((user) => findProfile(user.id, profiles)),
+  Option.andThen(findUser),
+  Option.andThen((user) => findTeam(user.teamId)),
 );
-// { type: 'Some', value: { userId: 'u1', displayName: 'Alice A.' } }
+// { type: 'Some', value: { id: 't1', name: 'Docs' } }
 
 const missing = Option.pipe(
   Option.some("u404"),
-  Option.andThen((id) => findUser(id, users)),
-  Option.andThen((user) => findProfile(user.id, profiles)), // never runs
+  Option.andThen(findUser),
+  Option.andThen((user) => findTeam(user.teamId)),
 );
-// { type: 'None' }
+// { type: 'None' }, the team lookup is not called
 ```
 
-In the second pipeline, the first `andThen` produces a `None`, so the second one is never called. Its callback does not run, exactly like the `isNone` early-return from the checking chapter, but without the `if`.
+Each callback receives a plain value, not an Option. The pipeline handles the wrapping between steps.
 
-## The callback returns the next Option
+## Using asynchronous steps
 
-The rule for `andThen`: the callback gets the current value and returns an `Option` (or an `OptionAsync`).
-This is what makes it a chain. Each step decides whether the next value exists:
+An `andThen` callback can return an `OptionAsync`. Later Promise-aware steps wait for it, so `map` receives the resolved value:
 
 ```ts
 import { Option } from "byenull";
 
 type User = { id: string; name: string };
 
-const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
-
-const findProfile = Option.fn((userId: string, profiles: { userId: string }[]) =>
-  profiles.find((profile) => profile.userId === userId),
-);
-
-declare const users: User[];
-declare const profiles: { userId: string }[];
-// ---cut-before---
-const step = Option.andThen((id: string) => findUser(id, users));
-// step takes an Option<string> and returns an Option<User>
-
-const chain = Option.pipe(
-  Option.some("u1"),
-  step, // Option<User>
-  Option.andThen((user: User) => findProfile(user.id, profiles)), // Option<{ userId: string }>
-);
-```
-
-## Mixing sync and async steps
-
-When a step's callback returns a `Promise`, like our avatar fetch, the chain becomes asynchronous and the following steps receive the resolved value.
-We `await` once, at the end:
-
-```ts
-import { Option } from "byenull";
-
-type User = { id: string; name: string };
-type Avatar = { url: string };
-
-const users: User[] = [{ id: "u1", name: "Alice" }];
-
-const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
-
-const fetchAvatar = Option.fn(async (user: User) => {
-  const response = await fetch(`/api/avatars/${user.id}`);
-  return response.json() as Promise<Avatar | null>;
+const fetchUser = Option.fn(async (id: string) => {
+  const user: User = { id: "u1", name: "Alice" };
+  return id === user.id ? user : null;
 });
 
-const avatarUrl = await Option.pipe(
+const userName = await Option.pipe(
   Option.some("u1"),
-  Option.andThen((id) => findUser(id, users)), // sync step
-  Option.andThen(fetchAvatar), // async step
-  Option.map((avatar) => avatar.url), // runs on the resolved value
+  Option.andThen(fetchUser),
+  Option.map((user) => user.name),
 );
-// Option<string>
+// { type: 'Some', value: 'Alice' }
 ```
 
-The type of the pipeline widens to `OptionAsync` the moment one step is asynchronous. See [The Sync/Async Model](../../explanation/sync-and-async) for how that works.
+The `fn` wrapper converts a nullish resolution or Promise rejection to `None`. Either outcome skips the following `map`. Await the pipeline once to get its final Option.
 
-## The complete chain
+For more on mixing synchronous and asynchronous work, see [How to mix sync and async Options](../../how-to/writing-async-pipelines) and [The sync/async model](../../explanation/sync-and-async).
 
-With chaining, the full profile lookup reads as one flow:
-
-```ts
-import { Option } from "byenull";
-
-type User = { id: string; name: string };
-type Profile = { userId: string; displayName?: string };
-type Avatar = { url: string };
-
-const users: User[] = [
-  { id: "u1", name: "Alice" },
-  { id: "u2", name: "Bob" },
-];
-const profiles: Profile[] = [{ userId: "u1", displayName: "Alice A." }];
-
-const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
-const findProfile = Option.fn((userId: string, profiles: Profile[]) =>
-  profiles.find((profile) => profile.userId === userId),
-);
-const fetchAvatar = Option.fn(async (user: User) => {
-  const response = await fetch(`/api/avatars/${user.id}`);
-  return response.json() as Promise<Avatar | null>;
-});
-
-const avatarFor = (id: string) =>
-  Option.pipe(
-    Option.some(id),
-    Option.andThen((id) => findUser(id, users)),
-    Option.andThen((user) => findProfile(user.id, profiles)),
-    Option.andThen((profile) => fetchAvatar(profile.userId)), // async step
-  );
-
-await avatarFor("u1"); // Option<Avatar>, or None at the first empty step
-await avatarFor("u404"); // { type: 'None' }
-```
-
-One pipeline, three lookups, no `if` statements.
-
-## Next steps
-
-A `None` skips the rest of the pipeline, but sometimes we want to catch it and continue with a fallback. That is the next chapter: [Recovering Options](./recovering-options).
+`andThen` does not recover from a `None`. To continue with a fallback Option, use [`orElse`](./recovering-options).
