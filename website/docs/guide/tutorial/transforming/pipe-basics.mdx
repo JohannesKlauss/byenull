@@ -25,6 +25,10 @@ const result = Option.pipe(
 
 `pipe` is a general utility. It works with any unary functions, not just byenull's.
 
+:::info
+Since byenull is designed to interop with [`@praha/byethrow`](https://praha-inc.github.io/byethrow/), we can use `Result.pipe` everywhere we use `Option.pipe`. In fact, they are exactly the same functions. It's recommended to stick with using one pipe function.
+:::
+
 ## Why use `pipe`?
 
 Without `pipe`, we either nest function calls, which must be read from the inside out:
@@ -61,7 +65,12 @@ declare const format: (x: number) => string;
 import { Option } from "byenull";
 
 // ✅ Clear: top to bottom
-const result = Option.pipe(5, addOne, double, format);
+const result = Option.pipe(
+  5,
+  addOne,
+  double,
+  format
+);
 ```
 
 ## Using `pipe` with Options
@@ -74,7 +83,9 @@ import { Option } from "byenull";
 
 type User = { id: string; name: string };
 
-const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
+const findUser = Option.fn((id: string, users: User[]) =>
+  users.find((user) => user.id === id)
+);
 
 const users: User[] = [{ id: "u1", name: "Alice" }];
 
@@ -105,9 +116,12 @@ const option = Option.pipe(
 
 This is why we don't need to check for absence after every step. The checking from the last chapter happens once, inside the pipeline.
 
+Notice how we got rid of if guards, nullish checks and early returns. With piping and Option, our functions can focus on the happy path and showing the business logic.
+We show the intent of what is supposed to happen, and we skip the steps that cannot happen if a value is missing.
+
 ## Our project as a pipeline
 
-Here is the `displayName` function from the checking chapter, rebuilt as a pipeline:
+Here is our `displayName` function, rebuilt as a pipeline:
 
 ```ts
 import { Option } from "byenull";
@@ -121,7 +135,10 @@ const users: User[] = [
 ];
 const profiles: Profile[] = [{ userId: "u1", displayName: "Alice A." }];
 
-const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
+const findUser = Option.fn((id: string, users: User[]) =>
+  users.find((user) => user.id === id)
+);
+
 const findProfile = Option.fn((userId: string, profiles: Profile[]) =>
   profiles.find((profile) => profile.userId === userId),
 );
@@ -142,14 +159,10 @@ displayName("u404"); // 'unknown', no user
 
 Every step is one line, absence flows through automatically, and the fallback lives at the very end.
 
-:::info
-`displayName` uses two functions we haven't met yet, `map` and `unwrap`. They are the subjects of the next chapters. The shape of the pipeline is what matters here.
-:::
-
 ## Async Steps
 
 If any step returns a `Promise`, the rest of the pipeline runs asynchronously and `pipe` returns a `Promise`.
-We only `await` the final result:
+We only have to `await` the pipe call itself:
 
 ```ts
 import { Option } from "byenull";
@@ -168,12 +181,3 @@ const avatarUrl = await Option.pipe(
 );
 // Option<string>
 ```
-
-## Functions in this chapter
-
-The following pages cover the functions we can use inside a pipeline.
-`map` transforms a value, `andThen` chains a step that can come up empty, and `orElse` recovers from an empty result.
-
-- [Mapping Options](./mapping-options)
-- [Chaining Options](./chaining-options)
-- [Recovering Options](./recovering-options)
