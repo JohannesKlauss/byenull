@@ -16,8 +16,6 @@ It is always one of two variants:
 
 In some languages and libraries this is also called a `Maybe` type.
 
-Unlike returning `null` or `undefined`, returning an `Option` encodes the possibility of absence in the type system itself.
-
 ## The structure
 
 An `Option` is a plain object with a `type` property that tells the two variants apart:

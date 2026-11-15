@@ -4,7 +4,7 @@ description: "Checking Options with isSome, isNone, and isOption: narrowing the 
 
 # Checking Options
 
-We can create Options now. In this chapter we look inside them, safely. Because an `Option` is a discriminated union, checking the `type` with a type guard narrows the type so `value` is available without a cast.
+How can we look inside the actual value of an Option? Because an `Option` is a discriminated union, checking the `type` with a type guard narrows the type so `value` is available without a cast.
 
 ## Checking for a Some with `isSome`
 
@@ -21,8 +21,10 @@ const users: User[] = [
   { id: "u2", name: "Bob" },
 ];
 const profiles: Profile[] = [{ userId: "u1", displayName: "Alice A." }];
-
-const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
+// ---cut-before---
+const findUser = Option.fn((id: string, users: User[]) =>
+  users.find((user) => user.id === id)
+);
 
 const user = findUser("u1", users);
 
@@ -37,15 +39,17 @@ Inside the `if` branch, TypeScript knows the Option is a `Some`, so `user.value`
 
 ## Checking for a None with `isNone`
 
-`isNone` is the mirror image. It narrows to the variant without a value:
+`isNone` is the flip side of the coin. It narrows to the variant without a value:
 
 ```ts
 import { Option } from "byenull";
 
 type User = { id: string; name: string };
 
-const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
-
+const findUser = Option.fn((id: string, users: User[]) =>
+  users.find((user) => user.id === id)
+);
+// ---cut-before---
 const user = findUser("u404", [{ id: "u1", name: "Alice" }]);
 
 if (Option.isNone(user)) {
@@ -68,8 +72,11 @@ const users: User[] = [
   { id: "u2", name: "Bob" },
 ];
 const profiles: Profile[] = [{ userId: "u1", displayName: "Alice A." }];
+// ---cut-before---
+const findUser = Option.fn((id: string, users: User[]) =>
+  users.find((user) => user.id === id)
+);
 
-const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
 const findProfile = Option.fn((userId: string, profiles: Profile[]) =>
   profiles.find((profile) => profile.userId === userId),
 );
@@ -91,24 +98,5 @@ displayName("u2"); // 'Bob', no profile, falls back to the name
 displayName("u404"); // 'Guest', no user at all
 ```
 
-This works, but notice the shape: two `if` blocks, nested lookups, and the absence-handling mixed into the happy path.
-Every following chapter of this tutorial replaces part of this with a single composed pipeline.
-
-## Checking unknown values with `isOption`
-
-`isOption` checks whether an arbitrary value is an Option at all, which is useful when data arrives untyped, for example from `JSON.parse` or a message channel:
-
-```ts
-import { Option } from "byenull";
-
-const value: unknown = { type: "Some", value: 42 };
-
-if (Option.isOption<number>(value)) {
-  // value is Option<number>
-  console.log(Option.isSome(value)); // true
-}
-```
-
-## Next steps
-
-Checking works, but composing beats checking. In the next chapter we meet `pipe`: [Pipe basics](../transforming/pipe-basics).
+This works, but the code is messy: multiple `if` blocks that guard execution, nested lookups, and the absence-handling are mixed into the happy path. It's hard to read what the logic of the function is.
+The next chapters will replace this imperative code block with a single composed pipeline.

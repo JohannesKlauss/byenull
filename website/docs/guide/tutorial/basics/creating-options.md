@@ -147,7 +147,3 @@ const avatar = await fetchAvatar("u1");
 ```
 
 We will use this fetch in the [chaining chapter](../transforming/chaining-options).
-
-## Next steps
-
-We can create Options now. In the next chapter we check which variant we have: [Checking Options](./checking-options).
