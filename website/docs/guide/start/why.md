@@ -4,30 +4,93 @@ description: Decide when Option pipelines are useful, what byenull leaves explic
 
 # Why byenull?
 
-TypeScript's `strictNullChecks` already prevents direct property access on a nullable value. Keep using `?.` and `??` for a local property or a single default. They are direct and need no wrapper.
+TypeScript's `strictNullChecks` configuration already prevents direct property access on a nullable value. Keep using `?.` and `??` for a local property or a single default. Byenull shines when you have more complex operations that operate on values that might be missing.
 
-byenull helps when absence passes through several operations. A lookup can return `Option<T>`, after which `map` and `andThen` run their callbacks only for Some. None reaches the end without invoking later value-side work. The return type preserves the possibility of absence throughout the pipeline.
+## The problem with `null` and `undefined`
 
-## Keep the decision at the boundary
+JavaScript has a lot of historical baggage. Among that baggage we find two ways to declare the absence of a value and messy identity checks.
 
-An Option pipeline still needs an exit. Use `Option.isSome` or `Option.isNone` when the two cases need different behavior. Use `Option.unwrap(defaultValue)` when a default is enough. `unwrap` returns the Some value or the default, and never throws for None.
+Most JavaScript developers treat `null`, `undefined` and `field?` as the same thing, when in fact they aren't:
 
-This moves repeated intermediate nullish handling into combinators. It does not remove the need for every null check. Input validation, API boundaries, and code that keeps raw nullable values still need appropriate checks.
+```ts
+null == undefined // true
+null === undefined // false
+typeof null // 'object'
+typeof undefined // 'undefined'
+```
 
-## Know what None leaves out
+Defining complex structures therefore can get very messy quite easily.
 
-None has no error or explanation. byenull also normalizes `null` and `undefined` to the same value, so it cannot preserve a distinction between them. Keep a nullable value or define a more specific union when that distinction matters.
+```ts
+type User = { name: string | null, avatar?: string | null, age: number | undefined }
 
-`Option.fn` and `Option.maybe` convert Promise rejection to None. This discards the rejection reason. They do not catch a synchronous throw, which continues to propagate. Use a Result when callers need either kind of failure information.
+// These are all valid shapes of a User
+const u1: User = {name: "John Doe", age: undefined}
+const u2: User = {name: "Jane Doe", avatar: null, age: undefined}
+const u3: User = {name: null, avatar: undefined, age: undefined}
+const u4: User = {name: null, age: undefined}
 
-These trade-offs make Option a poor substitute for general error handling. They also keep its data shape small: Some contains a `value`, while None contains only its `type`. Both are plain objects that can be logged, compared, and serialized.
+// TS2741: Property 'age' is missing in type '{ name: string; }' but required in type 'User'.
+const u4: User = {name: "John Doe"}
+```
 
-## Pair absence with failure
+With `undefined`, `null` and `?` in the mix, the typechecker allows multiple shapes of a user object.
 
-byenull complements `@praha/byethrow`; it is not another Result library. Return an Option when "not found" or "not set" needs no error. Return a Result when parsing fails, a request returns an error that the caller must inspect, or a business rule needs a typed reason.
+This can lead to a lot of subtle bugs, incoherent value absence handling and mapping issues, especially when talking to external APIs, i.e. your database, where undefined is not a concept, `null` might mean something different and missing object keys (because they defined with `fieldName?`) cause errors in queries.
 
-At a boundary between those models, `Option.toResult(error)` supplies the Failure error for None. `Option.fromResult` maps Failure to None and discards its error; this may lose useful information and should be a deliberate decision.
+Furthermore, if you declare a variable `var a` and don't explicitly set a value, it's initial value is `undefined`.
 
-Both libraries use namespaces and familiar operation names such as `map`, `andThen`, `orElse`, and `unwrap`. You can introduce byenull around one lookup without rewriting unrelated code that uses nullish values or Results.
+### byenull makes absence explicit
 
-The [quick start](./quick.md) shows where to construct, transform, guard, and convert Options.
+```ts
+import { O } from "byenull";
+
+type User = { name: O.Option<string>, avatar: O.Option<string>, age: O.Option<number> }
+
+const u1: User = {name: O.some("John Doe"), avatar: O.none(), age: O.none()}
+const u2: User = {name: O.none(), avatar: O.none(), age: O.none()}
+```
+
+`Option` tells the compiler explicitly that a value might be absent in one coherent way. Setting all fields is required reducing the amount of allowed shapes to 1.
+
+Keeping your business logic uniform and reducing the number of ways to do things is important for writing maintainable code, no matter if it is written by humans or agents. byenull gives you one uniform toolset to handle the absence of a value.
+
+## `Option` is not for error handling
+
+`None` has no error or explanation. byenull also normalizes both `null` and `undefined` to None, so it cannot preserve a distinction between them. Keep a nullable value or define a more specific union when that distinction matters (i.e. forms in HTML produce behave differently on `undefined` and `null`).
+
+Most importantly `None` cannot act as a error handling solution, since it does not hold any information on why a value might be absent.
+
+### Pair absence with failure
+
+byenull is designed to work well with the excellent [`@praha/byethrow`](https://praha-inc.github.io/byethrow/) library, which provides a `Result<T, E>` type to make failures explicit. Return an _Option_ when "not found" or "not set" needs no error. Return a _Result_ when parsing fails, a request returns an error that the caller must inspect, or a business rule needs a typed failure reason.
+
+Both libraries use namespaces and familiar operation names such as `map`, `andThen`, `orElse`, and `unwrap`, so if you already use one the two, you'll feel right at home with the other library.
+
+## Why byenull over other libraries?
+
+There are several Option libraries in the TypeScript ecosystem.
+byenull aims for the sweet spot between a minimal utility and a full functional programming framework.
+
+### Compared to other libraries
+
+Most Option libraries are direct ports from Rusts `Option<T>` enum. These libraries often use classes for the Option type and their ergonomics falls apart when mixing synchronous and async operations.
+byenull makes different trade-offs:
+
+- **Plain objects**: A byenull `Option` is a plain `{ type, value }` or `{ type }` object that can be logged, serialized, and compared as it is.
+- **Standalone functions**: Operations are independent functions combined with `pipe`, so unused ones are removed by tree-shaking.
+- **One API for sync and async**: The same functions work with both `Option` and `Promise<Option>`, so you never need to convert between two kinds of results.
+- **Interop with byethrow**: Functions such as `fromResult` and `toResult` allow for easy interop between the Result and Option type.
+
+### Compared to Effect and fp-ts
+
+Effect and fp-ts are extremely powerful, but they come with their own runtime model and a large vocabulary of functional programming concepts.
+byenull only deals with some value or no value, so your team can adopt it without learning a new programming paradigm.
+
+## Designed for Real-World Use
+
+- **Team-friendly**: Adopt it one function at a time. It works alongside existing code that throws.
+- **TypeScript-first**: Some types are inferred through every step of a pipeline.
+- **Lightweight**: A small runtime with full tree-shaking support.
+- **Predictable**: A consistent naming scheme (`map`, `andThen` / `orElse`, and so on) keeps the API easy to remember.
+- **Well-equipped**: A [linter plugin](../ecosystem/linter/index), [test matchers](../ecosystem/testing), and [documentation for AI assistants](../ecosystem/llm-integration) help the whole team follow the same patterns.
