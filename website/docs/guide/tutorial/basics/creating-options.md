@@ -93,8 +93,10 @@ const users: User[] = [
   { id: "u2", name: "Bob" },
 ];
 const profiles: Profile[] = [{ userId: "u1", displayName: "Alice A." }];
-
-const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
+// ---cut-before---
+const findUser = Option.fn((id: string, users: User[]) =>
+  users.find((user) => user.id === id)
+);
 
 const findProfile = Option.fn((userId: string, profiles: Profile[]) =>
   profiles.find((profile) => profile.userId === userId),

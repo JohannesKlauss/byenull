@@ -74,7 +74,6 @@ With `Option` we can make this uniform:
 ```ts
 import { Option } from "byenull";
 // ---cut-before---
-
 type User = {
   name: Option.Option<string>,
   avatar: Option.Option<string>,
@@ -109,7 +108,6 @@ const squareRoot = (a: number): Option.Option<number> => {
 
 const divisor = Math.random()
 // ---cut-before---
-
 const result = Option.pipe(
   Option.some(2),
   Option.andThen(val => divide(val, divisor)),
