@@ -61,7 +61,7 @@ pnpm --dir website dev
 - [Getting started](website/docs/guide/start/introduction.md) explains what byenull is and how to use its core workflow.
 - The [tutorial](website/docs/guide/tutorial/basics/option-type.md) builds a profile lookup with the core functions.
 - [How-to guides](website/docs/guide/how-to/importing-option.md) cover nullish sources, async pipelines, byethrow interoperability, and testing.
-- [Explanation](website/docs/guide/explanation/option-vs-null.md) discusses the Option type, sync and async pipelines, and design decisions.
+- [Explanation](website/docs/guide/explanation/option-vs-nullish.md) discusses the Option type, sync and async pipelines, and design decisions.
 - The [API reference](website/docs/api) is generated from source with TypeDoc on every website build.
 
 ## Contributing

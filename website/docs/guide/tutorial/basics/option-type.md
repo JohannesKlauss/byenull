@@ -63,7 +63,7 @@ With a nullable return type, the ambiguity follows the value everywhere, and eve
 With an `Option`, the check happens once, and the value types flow through every further step.
 
 We will see the composing part in the [transforming chapters](../transforming/pipe-basics).
-For the reasoning behind the split, see [Option vs null and undefined](../../explanation/option-vs-null).
+For the reasoning behind the split, see [Option vs null and undefined](../../explanation/option-vs-nullish).
 
 ## Async Options
 

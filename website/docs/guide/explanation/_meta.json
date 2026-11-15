@@ -6,7 +6,7 @@
   },
   {
     "type": "file",
-    "name": "option-vs-null",
+    "name": "option-vs-nullish",
     "label": "Option vs null and undefined"
   },
   {

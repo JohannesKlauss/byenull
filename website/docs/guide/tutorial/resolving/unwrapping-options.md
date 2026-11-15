@@ -91,4 +91,4 @@ const value = await Option.pipe(
 
 Unwrap at application boundaries, such as when rendering a response or returning a value from a CLI command. Keep the Option while more `map`, `andThen`, or `orElse` steps need to run.
 
-A default says that absence is acceptable. If a missing value must be handled as an error, [convert the Option to a Result](./converting-to-results) instead of hiding it with a default. [Option vs null and undefined](../../explanation/option-vs-null) discusses when plain nullish handling is clearer.
+A default says that absence is acceptable. If a missing value must be handled as an error, [convert the Option to a Result](./converting-to-results) instead of hiding it with a default. [Option vs null and undefined](../../explanation/option-vs-nullish) discusses when plain nullish handling is clearer.
