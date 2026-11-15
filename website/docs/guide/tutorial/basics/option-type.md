@@ -9,9 +9,14 @@ In this tutorial we will build a small profile lookup: given a user ID, we will 
 ## What is an Option?
 
 An `Option` represents the outcome of a lookup that may come up empty.
-It is always one of two variants. A `Some` means the lookup produced a value. A `None` means it produced nothing.
+It is always one of two variants:
 
-Unlike returning `null`, returning an `Option` encodes the possibility of absence in the type system itself.
+- `Some` means the lookup produced a value.
+- `None` means it produced nothing.
+
+In some languages and libraries this is also called a `Maybe` type.
+
+Unlike returning `null` or `undefined`, returning an `Option` encodes the possibility of absence in the type system itself.
 
 ## The structure
 
@@ -32,7 +37,7 @@ const none: Option.None = {
 };
 ```
 
-Because it is just an object, an `Option` can be logged, serialized to JSON, or compared in tests as it is.
+Because it is just an object, an `Option` can be logged, serialized to JSON, send freely between server and client or compared in tests as it is.
 In practice, we rarely write these objects by hand. The next chapter shows the functions that create them.
 
 ## The union type
@@ -43,15 +48,12 @@ In practice, we rarely write these objects by hand. The next chapter shows the f
 ```ts
 import { Option } from "byenull";
 
-type User = { id: string; name: string };
-
-// Returns either a Some<User> or a None
-const findUser = (id: string, users: User[]): Option.Option<User> => {
-  const user = users.find((user) => user.id === id);
-  if (user === undefined) {
+// Returns either a Some<number> or a None
+const divide = (a: number, b: number): Option.Option<number> => {
+  if (b === 0) {
     return Option.none();
   }
-  return Option.some(user);
+  return Option.some(a / b);
 };
 ```
 
@@ -59,11 +61,63 @@ A `None` never carries a value, so there is only one `None` type, and it is not 
 
 ## Why use an Option instead of nullish checks?
 
-With a nullable return type, the ambiguity follows the value everywhere, and every consumer has to re-check.
-With an `Option`, the check happens once, and the value types flow through every further step.
+### 1. One way to define missing value
 
-We will see the composing part in the [transforming chapters](../transforming/pipe-basics).
-For the reasoning behind the split, see [Option vs null and undefined](../../explanation/option-vs-nullish).
+In TypeScript we have multiple ways of defining a value that might be absent.
+
+```ts
+type User = { name: string | null, avatar?: string | null, age: number | undefined }
+```
+
+With `Option` we can make this uniform:
+
+```ts
+import { Option } from "byenull";
+// ---cut-before---
+
+type User = {
+  name: Option.Option<string>,
+  avatar: Option.Option<string>,
+  age: Option.Option<number>
+}
+```
+
+### 2. Option composes
+
+Options can be chained, collecting possible some types in a union automatically and skipping steps when a value is None.
+We'll learn more about piping and transforming in [Chaining Options](../transforming/chaining-options).
+
+```ts
+import { Option } from "byenull";
+
+const divide = (a: number, b: number): Option.Option<number> => {
+  if (b === 0) {
+    return Option.none();
+  }
+  return Option.some(a / b);
+};
+
+const square = (a: number): number => {
+  return a * a
+};
+
+const squareRoot = (a: number): Option.Option<number> => {
+  const res = Math.sqrt(a)
+  
+  return Number.isNaN(res) ? Option.none() : Option.some(res)
+};
+
+const divisor = Math.random()
+// ---cut-before---
+
+const result = Option.pipe(
+  Option.some(2),
+  Option.andThen(val => divide(val, divisor)),
+  Option.map(square),
+  Option.andThen(squareRoot),
+  Option.unwrap(0),
+)
+```
 
 ## Async Options
 
@@ -84,37 +138,3 @@ const fetchUser = async (id: string): Promise<Option.Option<User>> => {
 ```
 
 Every function in byenull accepts an `Option`, an `OptionAsync`, or either one. There are no separate `mapAsync`-style functions.
-
-## Utility types
-
-The remaining types are helpers that the library uses in its signatures. We will meet them in the editor rather than write them ourselves:
-
-```ts
-import { Option } from "byenull";
-
-type A = Option.OptionMaybeAsync<number>; // Option<number> | Promise<Option<number>>
-type B = Option.InferSome<Option.Option<number>>; // number
-type C = Option.OptionFor<Option.OptionAsync<number>, string>; // OptionAsync<string>
-```
-
-## Our project
-
-Here is the data we will build on throughout the tutorial, a user directory and optional profiles:
-
-```ts
-type User = { id: string; name: string };
-type Profile = { userId: string; displayName?: string; avatarUrl?: string };
-
-const users: User[] = [
-  { id: "u1", name: "Alice" },
-  { id: "u2", name: "Bob" },
-];
-
-const profiles: Profile[] = [{ userId: "u1", displayName: "Alice A." }];
-```
-
-`Bob` has no profile, and `u404` is not a user at all. Those are exactly the cases our lookup will handle with Options.
-
-## Next steps
-
-In the next chapter we create Options with the library's helper functions: [Creating Options](./creating-options).
