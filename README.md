@@ -66,10 +66,10 @@ This project is licensed under the [MIT license](https://github.com/JohannesKlau
 
 Johannes Klauss - [@JohannesKlauss](https://github.com/JohannesKlauss) - klauss.johannes@gmail.com
 
-Project Link: [https://github.com/JohannesKlauss/react-hotkeys-hook](https://github.com/JohannesKlauss/react-hotkeys-hook)
+Project Link: [https://github.com/JohannesKlauss/byenull](https://github.com/JohannesKlauss/byenull)
 
 ## Contributors
 
-<a href="https://github.com/johannesklauss/react-hotkeys-hook/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=johannesklauss/react-hotkeys-hook" />
+<a href="https://github.com/johannesklauss/byenull/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=johannesklauss/byenull" />
 </a>
