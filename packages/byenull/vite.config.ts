@@ -12,5 +12,6 @@ export default defineConfig({
       generator: "tsgo",
     },
     exports: true,
+    onSuccess: "node scripts/fix-declarations.mjs",
   },
 });
