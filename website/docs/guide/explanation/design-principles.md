@@ -4,13 +4,13 @@ description: "Why byenull uses plain objects, data-last functions, nullish-norma
 
 # Design principles
 
-byenull uses plain data and function pipelines. Those choices affect how you compose code, validate values, and handle asynchronous work. They also have costs that are worth understanding before you adopt the API.
+byenull uses plain data and function pipelines. Those choices affect how you compose code, validate values, and handle asynchronous work. They also have trade-offs that are worth understanding before you adopt the API.
 
 ## Options are plain objects
 
-An `Option` is either `{ type: "Some", value }` or `{ type: "None" }`. It has no class instance, private state, or prototype methods. You can inspect it in a debugger and compare it with ordinary object assertions. `JSON.stringify` can serialize the object when its payload is also serializable.
+An `Option` is either `{ type: "Some", value }` or `{ type: "None" }`. It has no class instance, private state, or prototype methods. You can inspect it in a debugger and compare it with ordinary object assertions. `JSON.stringify` can serialize the object when its payload is also serializable. This makes it easy to send Options between server and client.
 
-The cost is that values do not have methods such as `option.map(...)`. You import the functions you need and use type guards or pipelines. This keeps the data independent of the operations performed on it.
+The trade-off is that values do not have methods such as `option.map(...)`. You import the functions you need and use type guards or pipelines. This keeps the data independent of the operations performed on it.
 
 ## Constructors normalize nullish values
 
@@ -45,7 +45,7 @@ const domain = Option.pipe(
 // domain is a string
 ```
 
-A single transformation has an extra call layer, as `doubled` shows. A pipeline lists later steps in execution order, which avoids nesting a call around each preceding result. byenull uses this convention throughout instead of supporting both data-first and data-last variants.
+A single transformation has needs a separate call of the applied function, as `doubled` shows. A pipeline lists later steps in execution order, which avoids nesting a call around each preceding result. byenull uses this convention throughout instead of supporting both data-first and data-last variants.
 
 ## Synchronous throws and Promise rejections differ
 
@@ -55,20 +55,10 @@ A throw inside an `async` function becomes a Promise rejection, so `fn` and `may
 
 Converting a rejection to `None` discards its reason. Use a `Result` when the caller needs the rejection value for logging, recovery, or a user-facing message.
 
-## Promise support belongs to specific operations
-
-`map`, `andThen`, `orElse`, `unwrap`, `toResult`, and `fromResult` handle Promise-based inputs according to their signatures. Their synchronous and asynchronous paths share the same function names. See [Sync and async Options](./sync-and-async) for the runtime and type rules.
-
-The constructors and guards do not generally resolve Promises. Passing a Promise to `some` wraps the Promise as a payload. `none` takes no input, and the guards inspect the immediate value they receive. `fn` and `maybe` are a separate case because they adapt Promises returned by their callbacks.
-
-## The package root exports two namespace aliases
-
-The package root exports the `Option` and `O` namespaces. They expose the same functions and types, with `O` providing a shorter name. There is no behavioral difference between them.
-
-Use `Option` where the full name makes call sites clearer. Use `O` if your project prefers shorter pipelines. Pick one convention per module so readers do not have to switch names without a reason.
-
-## byenull follows byethrow where their behavior overlaps
+## byenull follows byethrow where their behaviors overlap
 
 byenull uses the namespace style, curried data-last functions, `pipe`, and Promise-aware combinators from [@praha/byethrow](https://praha-inc.github.io/byethrow/). Code that uses both libraries can keep the same pipeline structure.
 
 The two types still carry different information. `None` has no error field, while a byethrow `Failure` carries an error. `toResult` therefore requires an error for the empty case, and `fromResult` discards a failure's error. The shared conventions do not hide that difference.
+
+byenull is meant as a companion library to byethrow, though you can use either one exclusively.

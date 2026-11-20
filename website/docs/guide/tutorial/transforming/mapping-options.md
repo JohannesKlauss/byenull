@@ -85,7 +85,7 @@ Here `andThen` runs the asynchronous lookup. The following `map` only formats th
 
 ## Choosing between `map` and `andThen`
 
-Use `map` for a synchronous transformation. Use `andThen` when the callback returns an `Option` or `OptionAsync`. `andThen` uses that Option as the next pipeline value instead of nesting it, and a `None` skips its callback:
+Use `map` for a synchronous transformation. Use `andThen` when the callback is asynchronous and/or can return an absent value wrapped in Option. `andThen` uses that Option as the next pipeline value instead of nesting it, and a `None` skips its callback:
 
 ```ts
 import { Option } from "byenull";

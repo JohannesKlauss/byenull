@@ -4,7 +4,7 @@ description: "How to cross the boundary between byenull Options and @praha/byeth
 
 # How to convert between Option and Result
 
-To move a value between code that treats "no value" as absence (byenull) and code that treats it as failure ([@praha/byethrow](https://praha-inc.github.io/byethrow/)), convert at the boundary. `toResult` turns a `None` into a `Failure` you define; `fromResult` turns any `Failure` into a `None`.
+To move a value between code that treats "no value" as absence (byenull) and code that treats it as failure ([@praha/byethrow](https://praha-inc.github.io/byethrow/)), convert at the boundary. `toResult` turns a `None` into a `Failure` you define, while `fromResult` turns any `Failure` into a `None`.
 
 ## Convert an Option into a Result
 
@@ -83,6 +83,8 @@ const option = await Option.fromResult(Promise.resolve(Result.succeed(2)));
 // { type: 'Some', value: 2 }
 ```
 
-## Choose the conversion point
+## Where to convert from one to another
 
-To keep conversions rare, apply the rule of thumb: convert where the meaning changes, not in the middle of a pipeline. Look up a user with an `Option`. The moment "user not found" becomes an error your system reports, convert to a `Result` and stay there. For the reasoning behind the split, see [Option vs Result](../explanation/option-vs-result).
+To keep conversions rare, apply the rule of thumb: convert where the meaning changes. Looking up a user with an `Option` can be fine if you can work with a nullable value. If "user not found" becomes an error in your system, convert to a `Result` or use a Result in the first place. For the reasoning behind the split, see [Option vs Result](../explanation/option-vs-result).
+
+In general conversions _from_ Result happen more often than conversions _to_ Result. If you find yourself converting from Result to Option a lot, your system is probably silently dropping relevant errors.

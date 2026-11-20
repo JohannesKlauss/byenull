@@ -5,6 +5,8 @@ export * from "./functions/from-result";
 export * from "./functions/is-none";
 export * from "./functions/is-option";
 export * from "./functions/is-some";
+export * from "./functions/inspect";
+export * from "./functions/inspect-none";
 export * from "./functions/map";
 export * from "./functions/maybe";
 export * from "./functions/none";

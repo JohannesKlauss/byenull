@@ -4,7 +4,7 @@ description: "Recipes for turning nullish-returning APIs into Options that compo
 
 # How to handle nullish values
 
-To make a nullable lookup type-safe, convert its result into an `Option` at the source, then compose from there. This guide collects the patterns for the nullish values you meet in real code.
+To make a nullable lookup type-safe, convert its result into an `Option` at the source, then compose from there. This guide collects the patterns for the nullish values you'll often meet in real code.
 
 ## Turn `Array.find` into an Option
 

@@ -48,10 +48,8 @@ const findUser = Option.fn((id: string) => users.find((user) => user.id === id))
 
 const displayName = (id: string) =>
   Result.pipe(
-    Option.pipe(
-      findUser(id),
-      Option.toResult(new Error(`User not found: ${id}`)),
-    ),
+    findUser(id),
+    Option.toResult(new Error(`User not found: ${id}`)),
     Result.map((user) => user.name),
   );
 

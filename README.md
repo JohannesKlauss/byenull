@@ -46,6 +46,7 @@ if (Option.isSome(article)) {
 | --- | --- | --- |
 | [`byenull`](packages/byenull) | [![npm version](https://badge.fury.io/js/byenull.svg)](https://www.npmjs.com/package/byenull) | Core package |
 | [`byenull-testing`](packages/testing) | [![npm version](https://badge.fury.io/js/byenull-testing.svg)](https://www.npmjs.com/package/byenull-testing) | Testing matchers |
+| [`byenull-oxlint`](packages/oxlint) | [![npm version](https://badge.fury.io/js/byenull-oxlint.svg)](https://www.npmjs.com/package/byenull-oxlint) | Oxlint plugin/preset |
 | [`byenull-website`](website) | Private | Documentation website |
 
 ## Documentation

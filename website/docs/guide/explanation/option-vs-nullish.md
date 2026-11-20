@@ -6,7 +6,7 @@ description: "When an Option helps compose dependent operations, when nullish va
 
 TypeScript's `strictNullChecks` already requires you to handle nullable values. An `Option` does not remove that obligation. It gives presence and absence a common set of combinators, which helps when several operations depend on the same value.
 
-For an immediate local decision, a nullish value is often simpler. Neither representation explains why a value is missing. `None` deliberately carries no reason.
+For an immediate local decision, a nullish value is often simpler. Neither Option nor `null | undefined` explains why a value is missing.
 
 ## Use nullish values for local decisions
 
@@ -58,7 +58,7 @@ const avatar: string = Option.pipe(
 
 The nullable version states each check next to the call it guards. The Option version runs `andThen` callbacks only for `Some` and handles every `None` at `unwrap`. A fourth dependent lookup adds one `andThen` step, rather than another variable and null check.
 
-There is a real setup cost here. The Option version wraps three existing functions. If nothing else uses those wrappers, the nullable version may be the better choice. The wrappers become more useful when several callers share the same lookups or when the pipeline continues with recovery and transformation steps.
+This example illustrates the trade-offs in setup, explicitness and readability. The Option version wraps three existing functions. If nothing else uses those wrappers, the nullable version may be the better choice. The wrappers become more useful when several callers share the same lookups or when the pipeline continues with recovery and transformation steps.
 
 ## Narrowing works with both representations
 
@@ -79,7 +79,7 @@ The compiler enforces access in both cases. Option's added value is the ability 
 
 The nullish normalization performed by constructors also has limits. `Some<T>` does not exclude nullish types for hand-built objects, and `isOption` only checks the object's structure. See [Design principles](./design-principles#constructors-normalize-nullish-values) before accepting Option-shaped data from an external source.
 
-## Keep the reason when callers need it
+## Keep the failure reason when callers need it
 
 A nullish result and `None` can both represent "not loaded", "not found", or "not applicable". Neither records which outcome occurred. If those outcomes need different handling, use a richer return type or a `Result` with a typed error.
 

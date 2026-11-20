@@ -4,7 +4,7 @@ description: "How to choose between absence without a reason, anticipated failur
 
 # Option vs Result
 
-byenull and [@praha/byethrow](https://praha-inc.github.io/byethrow/) represent different outcomes. An `Option` records whether a value exists. A `Result` records either a value or an error. Choose between them by deciding what the caller needs to know and how it can respond.
+byenull and [@praha/byethrow](https://praha-inc.github.io/byethrow/) represent different outcomes. An `Option` represents a computation that can have no value. A `Result` represent a computation that can fail. Choose between them by deciding what the caller needs to know and how it can respond.
 
 ## Use Option when absence needs no explanation
 
@@ -81,9 +81,3 @@ const cachedConfig: Option.Option<Config> = Option.fromResult(loadedConfig);
 Handle or log a `Failure` before `fromResult` if its error still matters. Both converters handle asynchronous inputs. Await their results when the input is asynchronous.
 
 Keep conversions near the decision that changes the return type. An optional cache lookup can remain an `Option`. If startup cannot continue without that value, convert once to a `Result` with a startup-specific error. Converting every lookup before that point forces absence-only code to handle errors it does not need.
-
-## The libraries share conventions, not error behavior
-
-byethrow includes operations for typed error recovery and aggregation that do not apply to `None`. Keeping those operations in byethrow avoids duplicating them in an Option API that has no error data to process.
-
-The libraries use similar namespace names, data-last combinators, `pipe`, and Promise-aware functions. Their shared conventions make conversion code easier to read, but they do not make the types interchangeable. Use `Option` while all missing values receive the same handling. Switch to `Result` when the error itself must drive the next decision.

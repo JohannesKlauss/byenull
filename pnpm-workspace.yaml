@@ -2,6 +2,8 @@ packages:
   - packages/*
   - website
 
+allowBuilds:
+  '@parcel/watcher': set this to true or false
 catalog:
   "@types/node": ^26.6.6
   typescript: 7.0.2

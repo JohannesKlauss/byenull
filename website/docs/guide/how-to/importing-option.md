@@ -46,10 +46,6 @@ const option = O.pipe(
 
 The examples in this documentation use `Option`, but everything works the same with `O`.
 
-## Verify tree-shaking after adding the dependency
-
-Although you import a namespace, each function is an independent export. Modern bundlers keep only the functions you actually use, so a bundle that only calls `fn` does not contain `pipe`, `map`, or `andThen`. To confirm, check your bundle's output after importing byenull, or trust your bundler's tree-shaking analysis for `sideEffects`-free packages.
-
 ## Keep one style per codebase
 
 To avoid inconsistent, hard-to-search code, do not mix the two styles. If a file mixes them, split the imports:
