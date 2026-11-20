@@ -37,7 +37,7 @@ export default defineConfig({
     },
   ],
   rules: {
-    "byenull/consistent-namespace": "error",
+    "byenull/consistent-namespace": "error", // or ["error", "O"] to prefer `O`
   },
 });
 ```
@@ -48,7 +48,14 @@ export default defineConfig({
 
 Enforces a single namespace when importing from `byenull`. `byenull` exports its API under two namespaces, `Option` and `O`. This rule keeps imports consistent so both never appear in the same codebase.
 
-Options: `"Option"` (default) or `"O"`.
+Pass the accepted namespace as the rule's option (the second array element). Accepts `"Option"` (default) or `"O"`:
+
+```ts
+rules: {
+  "byenull/consistent-namespace": "error", // "Option" (default)
+  "byenull/consistent-namespace": ["error", "O"], // "O"
+}
+```
 
 ```ts
 // "Option" (default)
@@ -61,6 +68,78 @@ import { O } from "byenull"; // ✅
 ```
 
 The rule is auto-fixable: it rewrites the import specifier and all of its usages.
+
+### `byenull/no-ambiguous-some-type`
+
+Disallows non-specific Some types (`unknown`, `any`, `object`, `{}`) as the value type of `Option`, `OptionAsync`, `OptionMaybeAsync`, or `Some`. Specify a concrete type instead.
+
+```ts
+import { Option } from "byenull";
+
+type A = Option.Option<unknown>; // ❌ Specify a concrete Some type instead of `unknown`.
+type B = Option.Option<any>; // ❌
+type C = Option.Option<object>; // ❌
+type D = Option.Option<{}>; // ❌
+type E = Option.Option<User>; // ✅
+```
+
+### `byenull/no-negated-type-guards`
+
+Disallows negating `Option.isSome()` or `Option.isNone()`. Use the opposite guard instead.
+
+```ts
+import { Option } from "byenull";
+
+if (!Option.isSome(option)) {
+} // ❌ Use `Option.isNone(option)` instead.
+if (Option.isNone(option)) {
+} // ✅
+```
+
+The rule is auto-fixable: it replaces the negated guard with its counterpart.
+
+### `byenull/prefer-option-async`
+
+Prefers `OptionAsync<T>` over `Promise<Option<T>>`.
+
+```ts
+import { Option } from "byenull";
+
+type A = Promise<Option.Option<string>>; // ❌ Use `OptionAsync<T>` instead.
+type B = Option.OptionAsync<string>; // ✅
+```
+
+The rule is auto-fixable: it rewrites the wrapped type.
+
+### `byenull/prefer-option-maybe-async`
+
+Prefers `OptionMaybeAsync<T>` over a union of `Option<T> | OptionAsync<T>`.
+
+```ts
+import { Option } from "byenull";
+
+type A = Option.Option<string> | Option.OptionAsync<string>; // ❌ Use `OptionMaybeAsync<T>` instead.
+type B = Option.OptionMaybeAsync<string>; // ✅
+```
+
+The rule is auto-fixable: it collapses the union, preserving any additional union members.
+
+### `byenull/prefer-option-matchers`
+
+Prefers the [byenull-testing](https://www.npmjs.com/package/byenull-testing) matchers over manual assertions in test files (`**/*.test.*`, `**/__tests__/**/*`):
+
+```ts
+import { Option } from "byenull";
+
+expect(Option.isSome(option)).toBe(true); // ❌ Use `expect(option).toBeSome()`.
+assert(Option.isSome(option)); // ❌ Use `expect(option).toBeSome((value) => {})`.
+Option.unwrap(option); // ❌ Use `expect(option).toBeSome((value) => {})`.
+
+expect(option).toBeSome(); // ✅
+expect(option).toBeNone(); // ✅
+```
+
+The rule is auto-fixable and understands `.not`, `toBe(true|false)`, `toBeTruthy()`, and `toBeFalsy()` flips.
 
 ### Settings
 

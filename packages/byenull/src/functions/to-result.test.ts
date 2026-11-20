@@ -1,6 +1,7 @@
 import { R } from "@praha/byethrow";
 import { describe, expect, expectTypeOf, it } from "vite-plus/test";
 import { none } from "./none";
+import { pipe } from "./pipe";
 import { some } from "./some";
 import { toResult } from "./to-result";
 
@@ -55,5 +56,13 @@ describe("toResult", () => {
 
     expectTypeOf(sync).toEqualTypeOf<R.Result<number, string>>();
     expectTypeOf(async).toEqualTypeOf<R.ResultAsync<number, string>>();
+  });
+
+  it("should infer the result type when used inside a pipe", () => {
+    const piped = pipe(some(2), toResult("failure"));
+    const pipedAsync = pipe(Promise.resolve(some(2)), toResult("failure"));
+
+    expectTypeOf(piped).toEqualTypeOf<R.Result<number, string>>();
+    expectTypeOf(pipedAsync).toEqualTypeOf<R.ResultAsync<number, string>>();
   });
 });

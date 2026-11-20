@@ -1,8 +1,14 @@
-<div align="center">
+<p align="center">
+  <a href="https://www.npmjs.com/package/byenull"><img alt="npm version: byenull" src="https://img.shields.io/npm/v/byenull.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>
+  <a href="https://github.com/JohannesKlauss/byenull/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/johannesklauss/byenull.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>
+  <a href="https://www.npmjs.com/package/byenull"><img alt="npm downloads per month: byenull" src="https://img.shields.io/npm/dm/byenull.svg?style=for-the-badge&amp;labelColor=000000&amp;label=npm%20downloads" height="28"></a>
+</p>
 
-[![license](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/JohannesKlauss/byenull/blob/main/LICENSE)
-
-</div>
+<p align="center">
+  <a aria-label="Sponsored by Spaceteams" href="https://spaceteams.de">
+    <img alt="Sponsored by Spaceteams" src="https://raw.githubusercontent.com/spaceteams/badges/main/sponsored-by-spaceteams.svg">
+  </a>
+</p>
 
 ## Introduction
 
@@ -44,26 +50,9 @@ if (Option.isSome(article)) {
 
 | Package | Version | Description |
 | --- | --- | --- |
-| [`byenull`](packages/byenull) | [![npm version](https://badge.fury.io/js/byenull.svg)](https://www.npmjs.com/package/byenull) | Core package |
-| [`byenull-testing`](packages/testing) | [![npm version](https://badge.fury.io/js/byenull-testing.svg)](https://www.npmjs.com/package/byenull-testing) | Testing matchers |
-| [`byenull-oxlint`](packages/oxlint) | [![npm version](https://badge.fury.io/js/byenull-oxlint.svg)](https://www.npmjs.com/package/byenull-oxlint) | Oxlint plugin/preset |
-| [`byenull-website`](website) | Private | Documentation website |
-
-## Documentation
-
-The documentation lives in [`website/`](website) and follows the [Diátaxis](https://diataxis.fr/) method. Run it locally with:
-
-```bash
-pnpm install
-pnpm --filter byenull --filter byenull-testing build
-pnpm --dir website dev
-```
-
-- [Getting started](website/docs/guide/start/introduction.md) explains what byenull is and how to use its core workflow.
-- The [tutorial](website/docs/guide/tutorial/basics/option-type.md) builds a profile lookup with the core functions.
-- [How-to guides](website/docs/guide/how-to/importing-option.md) cover nullish sources, async pipelines, byethrow interoperability, and testing.
-- [Explanation](website/docs/guide/explanation/option-vs-nullish.md) discusses the Option type, sync and async pipelines, and design decisions.
-- The [API reference](website/docs/api) is generated from source with TypeDoc on every website build.
+| [`byenull`](packages/byenull) | <a href="https://www.npmjs.com/package/byenull"><img alt="npm version: byenull" src="https://img.shields.io/npm/v/byenull.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>| Core package |
+| [`byenull-testing`](packages/testing) | <a href="https://www.npmjs.com/package/byenull"><img alt="npm version: byenull" src="https://img.shields.io/npm/v/byenull-testing.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>| Testing matchers |
+| [`byenull-oxlint`](packages/oxlint) | <a href="https://www.npmjs.com/package/byenull"><img alt="npm version: byenull" src="https://img.shields.io/npm/v/byenull-oxlint.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>| Oxlint plugin/preset |
 
 ## Contributing
 
@@ -72,3 +61,15 @@ Contributions, issues, and feature requests are welcome. Use the [issues page](h
 ## License
 
 This project is licensed under the [MIT license](https://github.com/JohannesKlauss/byenull/blob/main/LICENSE).
+
+## Contact
+
+Johannes Klauss - [@JohannesKlauss](https://github.com/JohannesKlauss) - klauss.johannes@gmail.com
+
+Project Link: [https://github.com/JohannesKlauss/react-hotkeys-hook](https://github.com/JohannesKlauss/react-hotkeys-hook)
+
+## Contributors
+
+<a href="https://github.com/johannesklauss/react-hotkeys-hook/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=johannesklauss/react-hotkeys-hook" />
+</a>

@@ -22,6 +22,7 @@ typeof undefined // 'undefined'
 Defining complex structures therefore can get very messy quite easily.
 
 ```ts
+// @errors: 2741
 type User = { name: string | null, avatar?: string | null, age: number | undefined }
 
 // These are all valid shapes of a User
@@ -30,8 +31,8 @@ const u2: User = {name: "Jane Doe", avatar: null, age: undefined}
 const u3: User = {name: null, avatar: undefined, age: undefined}
 const u4: User = {name: null, age: undefined}
 
-// TS2741: Property 'age' is missing in type '{ name: string; }' but required in type 'User'.
-const u4: User = {name: "John Doe"}
+// This shape is rejected: 'age' is required
+const u5: User = {name: "John Doe"}
 ```
 
 With `undefined`, `null` and `?` in the mix, the typechecker allows multiple shapes of a user object.
@@ -93,4 +94,4 @@ byenull only deals with some value or no value, so your team can adopt it withou
 - **TypeScript-first**: Some types are inferred through every step of a pipeline.
 - **Lightweight**: A small runtime with full tree-shaking support.
 - **Predictable**: A consistent naming scheme (`map`, `andThen` / `orElse`, and so on) keeps the API easy to remember.
-- **Well-equipped**: A [linter plugin](../ecosystem/linter/index), [test matchers](../ecosystem/testing), and [documentation for AI assistants](../ecosystem/llm-integration) help the whole team follow the same patterns.
+- **Well-equipped**: A linter plugin, test matchers, and documentation for AI assistants help the whole team follow the same patterns.

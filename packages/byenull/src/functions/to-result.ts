@@ -1,6 +1,7 @@
 import { R } from "@praha/byethrow";
 import { isPromise } from "../internals/is-promise";
-import type { Option, OptionAsync } from "../option";
+import type { HasPromise } from "../internals/has-promise";
+import type { InferSome, Option, OptionMaybeAsync } from "../option";
 import { isSome } from "./is-some";
 
 /**
@@ -36,13 +37,16 @@ import { isSome } from "./is-some";
  *
  * @category Interop
  */
+export function toResult<E>(
+  err: E,
+): <O extends OptionMaybeAsync<any>>(
+  option: O,
+) => true extends HasPromise<O> ? R.ResultAsync<InferSome<O>, E> : R.Result<InferSome<O>, E>;
 export function toResult<E>(err: E) {
-  // The Option overload must come last: TypeScript uses the final overload
-  // when contextually typing the returned function, e.g. inside `pipe`.
-  function convert<T>(option: OptionAsync<T>): R.ResultAsync<T, E>;
-  function convert<T>(option: Option<T>): R.Result<T, E>;
-  function convert<T>(option: Option<T> | OptionAsync<T>) {
-    const apply = (o: Option<T>) => {
+  return <O extends OptionMaybeAsync<any>>(
+    option: O,
+  ): true extends HasPromise<O> ? R.ResultAsync<InferSome<O>, E> : R.Result<InferSome<O>, E> => {
+    const apply = (o: Option<any>) => {
       if (isSome(o)) {
         return R.succeed(o.value);
       }
@@ -50,8 +54,8 @@ export function toResult<E>(err: E) {
       return R.fail(err);
     };
 
-    return isPromise(option) ? option.then(apply) : apply(option);
-  }
-
-  return convert;
+    return (isPromise(option) ? option.then(apply) : apply(option)) as true extends HasPromise<O>
+      ? R.ResultAsync<InferSome<O>, E>
+      : R.Result<InferSome<O>, E>;
+  };
 }

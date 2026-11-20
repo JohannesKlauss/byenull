@@ -18,5 +18,10 @@
     "type": "file",
     "name": "recovering-options",
     "label": "Recovering Options"
+  },
+  {
+    "type": "file",
+    "name": "inspecting-options",
+    "label": "Inspecting Options"
   }
 ]
