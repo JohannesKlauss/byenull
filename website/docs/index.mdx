@@ -1,0 +1,34 @@
+---
+pageType: custom
+title: byenull
+description: An Option type for JavaScript and TypeScript, with optional byethrow interoperability.
+---
+
+import { InstallTabs } from "../theme/components/InstallTabs";
+
+<div className="landing">
+  <div className="landing-inner">
+    <section className="landing-hero">
+      <div className="hero-copy">
+        <h1>Make absence<br /><span>explicit.</span></h1>
+        <p>An Option type for values that may not exist.</p>
+        <div className="hero-actions"><a className="primary-action" href="/guide/start/introduction">Read the guide</a><a className="secondary-action" href="/api/modules/Option">API reference</a></div>
+        <InstallTabs />
+      </div>
+      <div className="code-window">
+        <pre><code><span className="purple">import</span> {'{ Option }'} <span className="purple">from</span> <span className="green">"byenull"</span>;{'\n\n'}<span className="muted">// A lookup may not return a value</span>{'\n'}<span className="purple">const</span> findUser = Option.<span className="blue">fn</span>((id: <span className="orange">string</span>) =&gt;{'\n'}  users.<span className="blue">find</span>((user) =&gt; user.id === id),{'\n'});{'\n\n'}<span className="purple">const</span> name = Option.<span className="blue">pipe</span>({'\n'}  <span className="blue">findUser</span>(<span className="green">"u1"</span>),{'\n'}  Option.<span className="blue">map</span>((user) =&gt; user.name),{'\n'}  Option.<span className="blue">unwrap</span>(<span className="green">"Anonymous"</span>),{'\n'});</code></pre>
+      </div>
+    </section>
+    <div className="landing-rule"><span>THE BASICS</span><span>01 / OPTION</span></div>
+    <section className="intro-grid"><div><div className="section-label">A SMALL, EXPLICIT TYPE</div><h2>Values may be missing.<br /><span>Make that visible.</span></h2></div><p>An <code>Option</code> is either <code>Some</code>, containing a value, or <code>None</code>. Transform the value when it exists; let absence pass through when it doesn’t.</p></section>
+    <section className="feature-grid">
+      <article><div className="feature-icon">{'{ }'}</div><h3>Plain objects</h3><p>Options are data, not class instances. Inspect, serialize, and pass them around like ordinary JavaScript objects.</p><code>{'{ type: "Some", value: 42 }'}</code></article>
+      <article><div className="feature-icon">&gt;_</div><h3>Composable operations</h3><p>Use <code>map</code>, <code>andThen</code>, and <code>orElse</code> in a pipeline. A None skips the remaining value transformations.</p><a href="/guide/tutorial/transforming/pipe-basics">Explore pipelines</a></article>
+      <article><div className="feature-icon">~</div><h3>Sync and async</h3><p>Use the same operations with Options and promises of Options. Await the result when your pipeline is asynchronous.</p><a href="/guide/explanation/sync-and-async">How async works</a></article>
+    </section>
+    <div className="landing-rule"><span>INTEROPERABILITY</span><span>02 / RESULT</span></div>
+    <section className="companion"><div><div className="section-label">OPTION + RESULT</div><h2>A companion to <span>byethrow.</span></h2><p>byenull follows the API design of <a href="https://praha-inc.github.io/byethrow/">byethrow</a> and provides conversions between Option and Result. The libraries have different authors; byenull is independently maintained and works on its own.</p><a className="text-link" href="/guide/how-to/converting-between-option-and-result">Read the conversion guide</a></div><div className="conversion"><div><span>byenull</span><strong>Option&lt;T&gt;</strong><small>presence / absence</small></div><div className="conversion-middle"><code>toResult(error)</code><div>──────────────</div><code>fromResult</code></div><div><span>byethrow</span><strong>Result&lt;T, E&gt;</strong><small>success / failure</small></div></div></section>
+    <section className="bottom-cta"><div><div className="section-label">GET STARTED</div><h2>Start with an Option.</h2><p>Install the package, then follow the guide to your first pipeline.</p></div><div className="hero-actions"><a className="primary-action" href="/guide/start/quick">Quick start</a><a className="secondary-action" href="https://github.com/JohannesKlauss/byenull">View on GitHub</a></div></section>
+    <footer className="landing-footer"><strong>byenull<span>.</span></strong><span>Open source · MIT License</span><div><a href="/guide/start/introduction">Guide</a><a href="/api/modules/Option">API</a><a href="https://github.com/JohannesKlauss/byenull">GitHub</a></div></footer>
+  </div>
+</div>
