@@ -16,7 +16,7 @@ pnpm add -D byenull-testing
 
 Register the matchers in a setup file, load it from your Vitest configuration, and augment the matcher types:
 
-```ts title="vitest.setup.ts"
+```ts title="vitest.setup.ts" no-twoslash
 import { expect } from "vitest";
 import { toBeNone, toBeSome } from "byenull-testing";
 
@@ -29,7 +29,7 @@ declare module "vitest" {
 expect.extend({ toBeSome, toBeNone });
 ```
 
-```ts title="vitest.config.ts"
+```ts title="vitest.config.ts" no-twoslash
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
@@ -43,7 +43,7 @@ export default defineConfig({
 
 The same matchers work in Jest. Register them in a setup file and augment the `expect` module:
 
-```ts title="jest.setup.ts"
+```ts title="jest.setup.ts" no-twoslash
 import { expect } from "@jest/globals";
 import { toBeNone, toBeSome } from "byenull-testing";
 
@@ -56,7 +56,7 @@ declare module "expect" {
 expect.extend({ toBeSome, toBeNone });
 ```
 
-```ts title="jest.config.ts"
+```ts title="jest.config.ts" no-twoslash
 export default {
   setupFilesAfterEnv: ["./jest.setup.ts"],
 };
@@ -66,7 +66,7 @@ export default {
 
 To check that a value is a `Some` and assert on its contents in one step, pass a callback to `toBeSome`. The callback parameter is typed as the `Some` value:
 
-```ts
+```ts no-twoslash
 import { Option } from "byenull";
 import { expect, test } from "vitest";
 
@@ -94,7 +94,7 @@ The callback only runs when the value is a `Some`. A `None` fails the matcher an
 
 To check that a lookup found nothing, use `toBeNone`:
 
-```ts
+```ts no-twoslash
 import { Option } from "byenull";
 import { expect, test } from "vitest";
 
