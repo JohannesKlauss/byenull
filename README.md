@@ -10,6 +10,8 @@
   </a>
 </p>
 
+<h1 align="center"><img src="website/docs/public/byenull-icon.svg" alt="" width="48" height="48" align="center"> byenull.</h1>
+
 ## Introduction
 
 `byenull` provides an Option type for JavaScript and TypeScript. It represents a value as `Some` or `None` and includes functions for creating, transforming, and checking Option values.
