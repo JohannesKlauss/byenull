@@ -10,6 +10,8 @@ export default defineConfig({
   title: "byenull",
   description:
     "A lightweight, tree-shakable Option type library for type-safe nullable handling in TypeScript.",
+  logo: "/byenull-icon.svg",
+  icon: "/byenull-icon.svg",
   logoText: "byenull",
   llms: true,
   plugins: [pluginTwoslash({ explicitTrigger: false }), pluginTypedoc()],
