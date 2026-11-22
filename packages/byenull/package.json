@@ -10,7 +10,8 @@
   "author": "Johannes Klauss <klauss.johannes@mail.com>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JohannesKlauss/byenull.git"
+    "url": "git+https://github.com/JohannesKlauss/byenull.git",
+    "directory": "packages/byenull"
   },
   "files": [
     "dist"

@@ -63,7 +63,7 @@
     "vite-plus": "catalog:"
   },
   "peerDependencies": {
-    "byenull": "workspace:*",
+    "byenull": "workspace:^",
     "oxlint": "^1.0.0"
   }
 }

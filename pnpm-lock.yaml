@@ -206,7 +206,7 @@ importers:
         specifier: ^1.88.0
         version: 1.88.0
       byenull:
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../byenull
     devDependencies:
       dedent:
@@ -225,7 +225,7 @@ importers:
   packages/testing:
     dependencies:
       byenull:
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../byenull
     devDependencies:
       typescript:

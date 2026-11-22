@@ -3,13 +3,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "vp pack",
+    "build": "pnpm -r --filter \"./packages/*\" run build",
     "dev": "vp pack --watch",
     "test": "vp test",
     "fmt": "vp fmt",
     "check": "vp check",
     "check:fix": "vp check --fix",
-    "prepublishOnly": "vp run build"
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish"
   },
   "devDependencies": {
     "@changesets/changelog-github": "1.0.1",
