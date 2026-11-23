@@ -50,16 +50,23 @@ const pluginDescription = (app: Application) => {
   });
 };
 
-const createApiDocument = async (apiDirectory: string): Promise<void> => {
+const createApiDocument = async (
+  apiDirectory: string,
+  entryPoint = "../packages/byenull/src/index.ts",
+  name = "byenull",
+): Promise<void> => {
   const app = await Application.bootstrapWithPlugins({
-    name: "byenull",
-    entryPoints: ["../packages/byenull/src/index.ts"],
+    name,
+    entryPoints: [entryPoint],
     tsconfig: "../packages/byenull/tsconfig.json",
     disableSources: true,
     router: "kind",
     readme: "none",
     indexFormat: "table",
     githubPages: false,
+    // Root and subpath docs share a tree that another Rspress process may read.
+    // Recursive cleanup here deletes the nested API pages during regeneration.
+    cleanOutputDir: false,
     requiredToBeDocumented: ["Class", "Function", "Interface"],
     categoryOrder: [
       "Core Types",
@@ -83,6 +90,7 @@ const createApiDocument = async (apiDirectory: string): Promise<void> => {
   });
 
   const project = await app.convert();
+  if (!project) throw new Error(`TypeDoc could not convert ${entryPoint}`);
   if (project) {
     // The markdown theme prefers a signature-level comment over the
     // function-level one; when a signature comment lost the @example tags,
@@ -129,6 +137,16 @@ const createMetaJson = async (apiDirectory: string): Promise<void> => {
           name: "functions",
           label: "Functions",
         },
+        {
+          type: "dir",
+          name: "zod",
+          label: "Zod Integration",
+        },
+        {
+          type: "dir",
+          name: "valibot",
+          label: "Valibot Integration",
+        },
       ],
       null,
       2,
@@ -143,6 +161,22 @@ export const pluginTypedoc = (): RspressPlugin => {
       const apiDirectory = path.join(config.root!, "api");
       await createApiDocument(apiDirectory);
       await createMetaJson(apiDirectory);
+      const zodDirectory = path.join(apiDirectory, "zod");
+      await createApiDocument(zodDirectory, "../packages/byenull/src/zod.ts", "byenull/zod");
+      await fs.promises.writeFile(
+        path.join(zodDirectory, "_meta.json"),
+        JSON.stringify(["index", { type: "dir", name: "functions", label: "Functions" }]),
+      );
+      const valibotDirectory = path.join(apiDirectory, "valibot");
+      await createApiDocument(
+        valibotDirectory,
+        "../packages/byenull/src/valibot.ts",
+        "byenull/valibot",
+      );
+      await fs.promises.writeFile(
+        path.join(valibotDirectory, "_meta.json"),
+        JSON.stringify(["index", { type: "dir", name: "functions", label: "Functions" }]),
+      );
       return config;
     },
   };

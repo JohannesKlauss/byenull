@@ -48,12 +48,24 @@ for (let i = 0; i < lines.length; i++) {
 }
 
 const missing = names.filter((name) => !declared.has(name));
+const imported = new Map();
+for (const match of declarations.matchAll(/^import \{ ([^}]+) \} from "([^"]+)";$/gm)) {
+  for (const binding of match[1].split(",")) {
+    const parts = binding.trim().split(/\s+as\s+/);
+    const local = parts[1] ?? parts[0];
+    imported.set(local, { original: parts[0], module: match[2] });
+  }
+}
+const unresolved = missing.filter((name) => !imported.has(name));
 
-if (missing.length > 0) {
+if (unresolved.length > 0) {
   throw new Error(
-    `No declaration found for: ${missing.join(", ")}. ` +
+    `No declaration or import found for: ${unresolved.join(", ")}. ` +
       "The dts generator output shape has changed - this script needs an update.",
   );
+}
+if (aliases.length !== 2 || !aliases.includes("Option") || !aliases.includes("O")) {
+  throw new Error("Expected exactly the Option and O namespace aliases.");
 }
 
 if (declarations.includes(SHIM)) {
@@ -61,7 +73,18 @@ if (declarations.includes(SHIM)) {
 }
 
 // `dist/exports.d.mts`: all declarations, exported at declaration site.
-writeFileSync(exportsFile, lines.join("\n") + `//#endregion\n`);
+const reexports = missing.map((name) => {
+  const { original, module } = imported.get(name);
+  if (!module.startsWith("./")) {
+    throw new Error(`Expected a local shared declaration chunk for ${name}.`);
+  }
+  const chunk = readFileSync(new URL(module.replace(/\.mjs$/, ".d.mts"), indexFile), "utf8");
+  if (!new RegExp(`\\bas ${original}\\b`).test(chunk)) {
+    throw new Error(`Shared declaration chunk does not export ${original} for ${name}.`);
+  }
+  return `export type { ${original} as ${name} } from "${module}";`;
+});
+writeFileSync(exportsFile, lines.join("\n") + reexports.join("\n") + `\n//#endregion\n`);
 
 // `dist/index.d.mts`: byethrow-style namespace re-exports.
 writeFileSync(

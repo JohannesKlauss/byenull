@@ -20,6 +20,8 @@
   "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",
+    "./valibot": "./dist/valibot.mjs",
+    "./zod": "./dist/zod.mjs",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -35,9 +37,21 @@
   "devDependencies": {
     "@praha/byethrow": "0.13.0",
     "typescript": "catalog:",
-    "vite-plus": "catalog:"
+    "valibot": "1.5.0",
+    "vite-plus": "catalog:",
+    "zod": "4.6.7"
   },
   "peerDependencies": {
-    "@praha/byethrow": "^0"
+    "@praha/byethrow": "^0",
+    "valibot": "^1.5.0",
+    "zod": "^4.6.7"
+  },
+  "peerDependenciesMeta": {
+    "valibot": {
+      "optional": true
+    },
+    "zod": {
+      "optional": true
+    }
   }
 }
