@@ -16,6 +16,11 @@
   },
   {
     "type": "file",
+    "name": "using-schema-options",
+    "label": "Integrate with Schema Libraries"
+  },
+  {
+    "type": "file",
     "name": "writing-async-pipelines",
     "label": "Mixing sync and async"
   },
