@@ -49,6 +49,7 @@ const settledValue: number = await value;
 The runtime behavior matches both members of that return type. A plain Option produces the value or fallback immediately. A Promise input produces a Promise for the value or fallback.
 
 // TODO: Rewrite this to illustrate Pipeline coloring when introducing async steps
+
 ## The shared API has visible type costs
 
 A separate set of async combinators could give each function a shorter signature. byenull instead uses conditional types such as `OptionFor`, which are harder to read in editor tooltips and error messages. Mixed-union inputs need particular care because `OptionFor` can declare a Promise even when one call returns synchronously.

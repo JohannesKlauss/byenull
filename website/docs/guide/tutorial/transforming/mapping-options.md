@@ -95,16 +95,10 @@ type Profile = { nickname?: string };
 const profile: Profile = { nickname: "Ada" };
 const getNickname = Option.fn((profile: Profile) => profile.nickname);
 
-const nested = Option.pipe(
-  Option.some(profile),
-  Option.map(getNickname),
-);
+const nested = Option.pipe(Option.some(profile), Option.map(getNickname));
 // { type: 'Some', value: { type: 'Some', value: 'Ada' } }
 
-const flat = Option.pipe(
-  Option.some(profile),
-  Option.andThen(getNickname),
-);
+const flat = Option.pipe(Option.some(profile), Option.andThen(getNickname));
 // { type: 'Some', value: 'Ada' }
 ```
 

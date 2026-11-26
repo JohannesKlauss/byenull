@@ -50,11 +50,11 @@ if (Option.isSome(article)) {
 
 ## Structure
 
-| Package | Version | Description |
-| --- | --- | --- |
-| [`byenull`](https://github.com/JohannesKlauss/byenull/tree/main/packages/byenull) | <a href="https://www.npmjs.com/package/byenull"><img alt="npm version: byenull" src="https://img.shields.io/npm/v/byenull.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>| Core package |
-| [`byenull-testing`](https://github.com/JohannesKlauss/byenull/tree/main/packages/testing) | <a href="https://www.npmjs.com/package/byenull"><img alt="npm version: byenull" src="https://img.shields.io/npm/v/byenull-testing.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>| Testing matchers |
-| [`byenull-oxlint`](https://github.com/JohannesKlauss/byenull/tree/main/packages/oxlint) | <a href="https://www.npmjs.com/package/byenull"><img alt="npm version: byenull" src="https://img.shields.io/npm/v/byenull-oxlint.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>| Oxlint plugin/preset |
+| Package                                                                                   | Version                                                                                                                                                                                           | Description          |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| [`byenull`](https://github.com/JohannesKlauss/byenull/tree/main/packages/byenull)         | <a href="https://www.npmjs.com/package/byenull"><img alt="npm version: byenull" src="https://img.shields.io/npm/v/byenull.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>         | Core package         |
+| [`byenull-testing`](https://github.com/JohannesKlauss/byenull/tree/main/packages/testing) | <a href="https://www.npmjs.com/package/byenull"><img alt="npm version: byenull" src="https://img.shields.io/npm/v/byenull-testing.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a> | Testing matchers     |
+| [`byenull-oxlint`](https://github.com/JohannesKlauss/byenull/tree/main/packages/oxlint)   | <a href="https://www.npmjs.com/package/byenull"><img alt="npm version: byenull" src="https://img.shields.io/npm/v/byenull-oxlint.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>  | Oxlint plugin/preset |
 
 ## Contributing
 

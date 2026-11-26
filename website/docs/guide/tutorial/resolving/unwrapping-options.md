@@ -13,10 +13,7 @@ Pass the default to `unwrap`, then use it as the last step in a pipeline:
 ```ts
 import { Option } from "byenull";
 
-const value = Option.pipe(
-  Option.some(42),
-  Option.unwrap(0),
-);
+const value = Option.pipe(Option.some(42), Option.unwrap(0));
 // 42
 
 const empty: Option.Option<number> = Option.none();

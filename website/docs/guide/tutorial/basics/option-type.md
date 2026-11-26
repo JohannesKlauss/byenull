@@ -64,7 +64,7 @@ A `None` never carries a value, so there is only one `None` type, and it is not 
 In TypeScript we have multiple ways of defining a value that might be absent.
 
 ```ts
-type User = { name: string | null, avatar?: string | null, age: number | undefined }
+type User = { name: string | null; avatar?: string | null; age: number | undefined };
 ```
 
 With `Option` we can make this uniform:
@@ -73,10 +73,10 @@ With `Option` we can make this uniform:
 import { Option } from "byenull";
 // ---cut-before---
 type User = {
-  name: Option.Option<string>,
-  avatar: Option.Option<string>,
-  age: Option.Option<number>
-}
+  name: Option.Option<string>;
+  avatar: Option.Option<string>;
+  age: Option.Option<number>;
+};
 ```
 
 ### 2. Option composes
@@ -95,24 +95,24 @@ const divide = (a: number, b: number): Option.Option<number> => {
 };
 
 const square = (a: number): number => {
-  return a * a
+  return a * a;
 };
 
 const squareRoot = (a: number): Option.Option<number> => {
-  const res = Math.sqrt(a)
-  
-  return Number.isNaN(res) ? Option.none() : Option.some(res)
+  const res = Math.sqrt(a);
+
+  return Number.isNaN(res) ? Option.none() : Option.some(res);
 };
 
-const divisor = Math.random()
+const divisor = Math.random();
 // ---cut-before---
 const result = Option.pipe(
   Option.some(2),
-  Option.andThen(val => divide(val, divisor)),
+  Option.andThen((val) => divide(val, divisor)),
   Option.map(square),
   Option.andThen(squareRoot),
   Option.unwrap(0),
-)
+);
 ```
 
 ## Async Options

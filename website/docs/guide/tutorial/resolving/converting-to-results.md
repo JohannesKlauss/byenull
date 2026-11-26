@@ -18,16 +18,10 @@ type User = { id: string; name: string };
 const present: Option.Option<User> = Option.some({ id: "u1", name: "Alice" });
 const missing: Option.Option<User> = Option.none();
 
-const success = Option.pipe(
-  present,
-  Option.toResult(new Error("User not found")),
-);
+const success = Option.pipe(present, Option.toResult(new Error("User not found")));
 // { type: 'Success', value: { id: 'u1', name: 'Alice' } }
 
-const failure = Option.pipe(
-  missing,
-  Option.toResult(new Error("User not found")),
-);
+const failure = Option.pipe(missing, Option.toResult(new Error("User not found")));
 // { type: 'Failure', error: Error('User not found') }
 ```
 
@@ -84,15 +78,10 @@ import { Result } from "@praha/byethrow";
 
 const empty: Option.Option<number> = Option.none();
 
-const result = await Option.pipe(
-  Promise.resolve(empty),
-  Option.toResult("No value"),
-);
+const result = await Option.pipe(Promise.resolve(empty), Option.toResult("No value"));
 // { type: 'Failure', error: 'No value' }
 
-const option = await Option.fromResult(
-  Promise.resolve(Result.fail("No value")),
-);
+const option = await Option.fromResult(Promise.resolve(Result.fail("No value")));
 // { type: 'None' }
 ```
 

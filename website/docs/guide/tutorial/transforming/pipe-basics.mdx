@@ -65,12 +65,7 @@ declare const format: (x: number) => string;
 import { Option } from "byenull";
 
 // ✅ Clear: top to bottom
-const result = Option.pipe(
-  5,
-  addOne,
-  double,
-  format
-);
+const result = Option.pipe(5, addOne, double, format);
 ```
 
 ## Using `pipe` with Options
@@ -83,9 +78,7 @@ import { Option } from "byenull";
 
 type User = { id: string; name: string };
 
-const findUser = Option.fn((id: string, users: User[]) =>
-  users.find((user) => user.id === id)
-);
+const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
 
 const users: User[] = [{ id: "u1", name: "Alice" }];
 
@@ -135,9 +128,7 @@ const users: User[] = [
 ];
 const profiles: Profile[] = [{ userId: "u1", displayName: "Alice A." }];
 
-const findUser = Option.fn((id: string, users: User[]) =>
-  users.find((user) => user.id === id)
-);
+const findUser = Option.fn((id: string, users: User[]) => users.find((user) => user.id === id));
 
 const findProfile = Option.fn((userId: string, profiles: Profile[]) =>
   profiles.find((profile) => profile.userId === userId),

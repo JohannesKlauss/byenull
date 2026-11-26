@@ -13,26 +13,26 @@ JavaScript has a lot of historical baggage. Among that baggage we find two ways 
 Most JavaScript developers treat `null`, `undefined` and `field?` as the same thing, when in fact they aren't:
 
 ```ts
-null == undefined // true
-null === undefined // false
-typeof null // 'object'
-typeof undefined // 'undefined'
+null == undefined; // true
+null === undefined; // false
+typeof null; // 'object'
+typeof undefined; // 'undefined'
 ```
 
 Defining complex structures therefore can get very messy quite easily.
 
 ```ts
 // @errors: 2741
-type User = { name: string | null, avatar?: string | null, age: number | undefined }
+type User = { name: string | null; avatar?: string | null; age: number | undefined };
 
 // These are all valid shapes of a User
-const u1: User = {name: "John Doe", age: undefined}
-const u2: User = {name: "Jane Doe", avatar: null, age: undefined}
-const u3: User = {name: null, avatar: undefined, age: undefined}
-const u4: User = {name: null, age: undefined}
+const u1: User = { name: "John Doe", age: undefined };
+const u2: User = { name: "Jane Doe", avatar: null, age: undefined };
+const u3: User = { name: null, avatar: undefined, age: undefined };
+const u4: User = { name: null, age: undefined };
 
 // This shape is rejected: 'age' is required
-const u5: User = {name: "John Doe"}
+const u5: User = { name: "John Doe" };
 ```
 
 With `undefined`, `null` and `?` in the mix, the typechecker allows multiple shapes of a user object.
@@ -46,10 +46,10 @@ Furthermore, if you declare a variable `var a` and don't explicitly set a value,
 ```ts
 import { O } from "byenull";
 
-type User = { name: O.Option<string>, avatar: O.Option<string>, age: O.Option<number> }
+type User = { name: O.Option<string>; avatar: O.Option<string>; age: O.Option<number> };
 
-const u1: User = {name: O.some("John Doe"), avatar: O.none(), age: O.none()}
-const u2: User = {name: O.none(), avatar: O.none(), age: O.none()}
+const u1: User = { name: O.some("John Doe"), avatar: O.none(), age: O.none() };
+const u2: User = { name: O.none(), avatar: O.none(), age: O.none() };
 ```
 
 `Option` tells the compiler explicitly that a value might be absent in one coherent way. Setting all fields is required reducing the amount of allowed shapes to 1.

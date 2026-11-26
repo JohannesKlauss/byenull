@@ -104,7 +104,7 @@ The second pipeline shows both callbacks in their natural roles: the user is fou
 
 ## References
 
-| API                                                        | Purpose                              |
-| ---------------------------------------------------------- | ------------------------------------ |
-| [inspect(fn)](/api/functions/Option.inspect)               | Run a side effect on the `Some` value |
-| [inspectNone(fn)](/api/functions/Option.inspectNone)       | Run a side effect on a `None`         |
+| API                                                  | Purpose                               |
+| ---------------------------------------------------- | ------------------------------------- |
+| [inspect(fn)](/api/functions/Option.inspect)         | Run a side effect on the `Some` value |
+| [inspectNone(fn)](/api/functions/Option.inspectNone) | Run a side effect on a `None`         |

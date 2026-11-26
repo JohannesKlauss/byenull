@@ -54,7 +54,7 @@ The `map` callback does not run after None. `unwrap` returns the value inside So
 
 Use _Option_ when there might be no value available at the end of a computation and you don't care about errors or failures. This suits array lookups, optional settings, nested optional values and other operations where absence needs no explanation.
 
-Use a _Result_ when the caller needs an error, a cause, or another failure detail to act upon. You can use `Option.toResult(error)` and  `Option.fromResult` to turn a Option type into a Result and vice versa.
+Use a _Result_ when the caller needs an error, a cause, or another failure detail to act upon. You can use `Option.toResult(error)` and `Option.fromResult` to turn a Option type into a Result and vice versa.
 
 ## When to Use byenull
 

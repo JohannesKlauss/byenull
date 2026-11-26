@@ -1,6 +1,6 @@
 {
   "name": "byenull",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Say goodbye to null and undefined. Lightweight, tree-shakable with a clear and consistent API.",
   "homepage": "https://github.com/JohannesKlauss/byenull#readme",
   "bugs": {
