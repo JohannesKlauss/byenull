@@ -2,7 +2,7 @@
   "name": "byenull",
   "version": "0.2.0",
   "description": "Say goodbye to null and undefined. Lightweight, tree-shakable with a clear and consistent API.",
-  "homepage": "https://github.com/JohannesKlauss/byenull#readme",
+  "homepage": "https://byenull.netlify.app/",
   "bugs": {
     "url": "https://github.com/JohannesKlauss/byenull/issues"
   },
