@@ -230,7 +230,7 @@ body {
 .landing h2 span {
   color: #f05b61;
 }
-.landing p:not(h1 p), .landing p:not(h2 p) {
+.landing p:not(h1 p), .landing p:not(h2 p), .landing p:not(a p) {
   color: var(--dim);
   font-size: 16px;
   line-height: 1.8;
